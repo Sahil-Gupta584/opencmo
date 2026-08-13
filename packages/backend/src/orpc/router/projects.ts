@@ -5,7 +5,8 @@ import { fetchSubredditDetails } from '../../reddit.js'
 import { callAI } from '../../ai.js'
 import { decrypt } from '../../crypto.js'
 import { fetchInboundsForProject } from '../../inbounds-service.js'
-import { AnalyzeProductSchema, CreateProjectSchema, GenerateDraftSchema, RefreshSubredditsSchema } from '../schema.js'
+import { generateDailyContentForProject } from '../../daily-content.js'
+import { AnalyzeProductSchema, CreateProjectSchema, UpdateProjectSchema, RefreshSubredditsSchema, AddSubredditSchema, RemoveSubredditSchema } from '../schema.js'
 import { ORPCError } from '@orpc/client'
 
 function getAiCredentials(apiConfig: any) {
@@ -129,44 +130,32 @@ export const createProject = authed.input(CreateProjectSchema).handler(async ({ 
     console.error(`🔴 createProject: background inbound fetch failed for project ${project.id}:`, err)
   })
 
+  // Immediately generate the first daily content batch (3 social + 1 article).
+  // Fire-and-forget: sets project.isGeneratingContent=true so the UI can show
+  // "generating your first batch..." while it runs.
+  generateDailyContentForProject(project.id).catch((err) => {
+    console.error(`🔴 createProject: background content generation failed for project ${project.id}:`, err)
+  })
+
   return project
 })
 
-export const generateDraft = authed.input(GenerateDraftSchema).handler(async ({ input, context }) => {
+export const updateProject = authed.input(UpdateProjectSchema).handler(async ({ input, context }) => {
   const userId = context.user.id
 
-  const project = await prisma.project.findFirst({
+  const existing = await prisma.project.findFirst({
     where: { id: input.projectId, userId },
   })
-  if (!project) throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
+  if (!existing) throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
 
-  const apiConfig = await prisma.userApiConfig.findUnique({ where: { userId } })
-  if (!apiConfig) throw new ORPCError('BAD_REQUEST', { message: 'API Key missing' })
-
-  const { provider, apiKey } = getAiCredentials(apiConfig)
-
-  const system = `You are an expert Reddit community strategist. Draft natural, human-sounding posts for subreddits. Avoid corporate jargon, heavy link dropping, or promotional fluff. Write first-person, authentic narratives.`
-
-  const prompt = `Write a post for ${input.subreddit} about my SaaS product:
-Product: ${project.name}
-Description: ${project.description}
-Audience: ${project.targetAudience}
-
-Include a title line and body.`
-
-  const content = await callAI({ provider, apiKey, prompt, system })
-
-  // Sentinel Risk Score calculation (Simple heuristic)
-  const linkCount = (content.match(/https?:\/\//g) || []).length
-  const riskScore = linkCount > 1 ? 65 : 15
-
-  return prisma.contentDraft.create({
+  return prisma.project.update({
+    where: { id: existing.id },
     data: {
-      projectId: project.id,
-      subreddit: input.subreddit,
-      content,
-      riskScore,
-      riskReport: riskScore > 50 ? 'High link density detected. Reduce external links to prevent spam flags.' : 'Low risk',
+      name: input.name,
+      url: input.url,
+      description: input.description,
+      targetAudience: input.targetAudience,
+      keywords: input.keywords,
     },
   })
 })
@@ -223,4 +212,58 @@ Return a JSON array of strings containing exact subreddit names with r/ prefix (
   })
 
   return prisma.projectSubreddit.findMany({ where: { projectId: project.id } })
+})
+
+export const addSubreddit = authed.input(AddSubredditSchema).handler(async ({ input, context }) => {
+  const userId = context.user.id
+
+  const project = await prisma.project.findFirst({
+    where: { id: input.projectId, userId },
+  })
+  if (!project) throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
+
+  const apiConfig = await prisma.userApiConfig.findUnique({ where: { userId } })
+  if (!apiConfig) throw new ORPCError('BAD_REQUEST', { message: 'API Key missing' })
+
+  const { provider, apiKey } = getAiCredentials(apiConfig)
+
+  const name = input.name.replace(/^r\//, '').trim()
+  if (!name) throw new ORPCError('BAD_REQUEST', { message: 'Subreddit name is required' })
+
+  const details = await fetchSubredditDetails(name, { provider, apiKey })
+  if (!details) {
+    throw new ORPCError('BAD_REQUEST', { message: `r/${name} does not exist on Reddit` })
+  }
+
+  const existing = await prisma.projectSubreddit.findUnique({
+    where: { projectId_name: { projectId: project.id, name: details.name } },
+  })
+  if (existing) {
+    throw new ORPCError('BAD_REQUEST', { message: `${details.name} is already being monitored` })
+  }
+
+  return prisma.projectSubreddit.create({
+    data: {
+      projectId: project.id,
+      name: details.name,
+      description: details.description,
+      relevance: 95,
+    },
+  })
+})
+
+export const removeSubreddit = authed.input(RemoveSubredditSchema).handler(async ({ input, context }) => {
+  const userId = context.user.id
+
+  const project = await prisma.project.findFirst({
+    where: { id: input.projectId, userId },
+  })
+  if (!project) throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
+
+  const name = input.name.replace(/^r\//, '').trim()
+  const deleted = await prisma.projectSubreddit.deleteMany({
+    where: { projectId: project.id, name: `r/${name}` },
+  })
+
+  return { removed: deleted.count > 0 }
 })

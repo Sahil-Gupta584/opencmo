@@ -6,10 +6,12 @@
     "src/inbounds-service.ts",
     "src/inbounds-evaluator.ts",
     "src/notifications.ts",
+    "src/daily-content.ts",
     "src/orpc/router/index.ts",
     "src/orpc/router/cron.ts",
     "src/orpc/router/inbounds.ts",
     "src/orpc/router/projects.ts",
+    "src/orpc/router/demo.ts",
     "src/orpc/middleware.ts"
   ],
   "compilerOptions": {

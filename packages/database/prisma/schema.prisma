@@ -94,6 +94,8 @@ model Project {
   keywords       String[]
   isFetching     Boolean             @default(false)
   lastFetchedAt  DateTime?           // When the last inbound fetch completed
+  isGeneratingContent Boolean        @default(false) // True while a daily content batch is being generated
+  lastContentGeneratedAt DateTime?   // When the last daily content batch completed
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
   subreddits     ProjectSubreddit[]

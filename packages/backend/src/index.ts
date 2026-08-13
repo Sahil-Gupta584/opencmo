@@ -7,6 +7,7 @@ import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import router from './orpc/router/index.js'
 
 export { default as router } from './orpc/router/index.js'
+export { dodo } from './dodo.js'
 
 export const rpcHandler = new RPCHandler(router)
 export const openApiHandler = new OpenAPIHandler(router, {

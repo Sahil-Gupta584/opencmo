@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Button, Chip, Spinner } from '@heroui/react'
 import { Input } from '#/components/Input'
 import { Textarea } from '#/components/Textarea'
@@ -20,6 +20,7 @@ import {
   RiSettingsLine,
   RiErrorWarningLine,
   RiArrowLeftLine,
+  RiDashboardLine,
 } from 'react-icons/ri'
 
 export const Route = createFileRoute('/_protected/new')({
@@ -64,6 +65,18 @@ const ANALYSIS_STEPS = [
   { label: 'Setting up your workspace', icon: RiSettingsLine },
 ]
 
+function DashboardLink() {
+  return (
+    <Link
+      to="/dashboard"
+      className="fixed left-6 top-6 z-10 flex h-10 items-center gap-2 rounded-full border border-line bg-card px-4 text-[13px] font-semibold text-muted no-underline shadow-sm transition-colors hover:text-ink"
+    >
+      <RiDashboardLine className="text-base text-coral" />
+      Dashboard
+    </Link>
+  )
+}
+
 function AnalyzingState() {
   const [step, setStep] = useState(0)
 
@@ -76,6 +89,7 @@ function AnalyzingState() {
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <DashboardLink />
       <div className="relative mb-8 flex h-16 w-16 items-center justify-center">
         <span className="absolute inset-0 animate-ping rounded-2xl bg-coral/15" />
         <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-coral text-white shadow-lg">
@@ -251,6 +265,7 @@ function NewProductPage() {
   if (!analyzedData && !analyzeMutation.isPending) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6">
+        <DashboardLink />
         <div className="w-full max-w-xl">
           <div className="flex flex-col items-center text-center">
             <div className="mb-5 flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-coral/10">
@@ -311,6 +326,7 @@ function NewProductPage() {
   // Step 3: Interactive Review & Edit Form
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
+      <DashboardLink />
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-ink">Review what we found</h1>
         <p className="mt-3 text-base text-muted">

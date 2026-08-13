@@ -85,6 +85,20 @@ export const createServer = (): Express => {
   app
     .disable("x-powered-by")
     .use(morgan("dev"))
+    .use(
+      "/api/webhook/dodo",
+      bodyParser.text({ type: () => true }),
+      async (req, res, next) => {
+        try {
+          // Lazy import so @repo/database (which reads env at module load)
+          // is only loaded after dotenv config has run in index.ts
+          const { handleDodoWebhook } = await import("./webhooks/dodo");
+          await handleDodoWebhook(req, res);
+        } catch (error) {
+          next(error);
+        }
+      },
+    )
     .use(urlencoded({ extended: true }))
     .use(json())
     .use(
@@ -105,7 +119,7 @@ export const createServer = (): Express => {
     .get("/message/:name", (req, res) => {
       return res.json({ message: `hello ${req.params.name}` });
     })
-    .get("/status", (_, res) => {
+    .get("/health", (_, res) => {
       return res.json({ ok: true });
     });
 

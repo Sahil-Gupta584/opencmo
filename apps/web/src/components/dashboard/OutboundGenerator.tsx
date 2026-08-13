@@ -1,30 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { Card, CardBody, Chip, Spinner, Tabs, Tab } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
 import { useState } from 'react'
-import { getActiveProjectId } from '#/lib/active-project'
-import { RiFileCopyLine, RiCheckLine, RiLoader4Line, RiArticleLine, RiHashtag } from 'react-icons/ri'
+import { RiFileCopyLine, RiCheckLine, RiArticleLine, RiHashtag } from 'react-icons/ri'
 
-export const Route = createFileRoute('/_protected/dashboard/outbound')({
-  component: OutboundPage,
-})
-
-function formatDayLabel(date: Date, todayStart: Date, yesterdayStart: Date): string {
-  if (date >= todayStart) return 'Today'
-  if (date >= yesterdayStart) return 'Yesterday'
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+interface OutboundGeneratorProps {
+  activeProjectId: string
+  isDemo?: boolean
 }
 
-function OutboundPage() {
-  const activeProjectId = getActiveProjectId() || ''
+export function OutboundGenerator({ activeProjectId, isDemo = false }: OutboundGeneratorProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [typeFilter, setTypeFilter] = useState<'SOCIAL' | 'ARTICLE'>('SOCIAL')
 
-  // Fetch projects; poll while the active project is generating so today's batch
-  // appears as soon as it finishes.
+  const api = isDemo ? orpc.demo : orpc
+
   const { data: projects = [], isLoading: loadingProjects } = useQuery({
-    ...orpc.listProjects.queryOptions(),
+    ...api.listProjects.queryOptions(),
     staleTime: 0,
   })
 
@@ -48,17 +40,13 @@ function OutboundPage() {
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
-  const yesterdayStart = new Date(todayStart)
-  yesterdayStart.setDate(todayStart.getDate() - 1)
 
   const sorted = [...drafts].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const todayDrafts = sorted.filter((d: any) => new Date(d.createdAt) >= todayStart)
   const historyDrafts = sorted.filter((d: any) => new Date(d.createdAt) < todayStart)
 
-  const todayByType = (type: 'SOCIAL' | 'ARTICLE') =>
-    todayDrafts.filter((d: any) => d.type === type)
-  const historyByType = (type: 'SOCIAL' | 'ARTICLE') =>
-    historyDrafts.filter((d: any) => d.type === type)
+  const todayByType = (type: 'SOCIAL' | 'ARTICLE') => todayDrafts.filter((d: any) => d.type === type)
+  const historyByType = (type: 'SOCIAL' | 'ARTICLE') => historyDrafts.filter((d: any) => d.type === type)
 
   const groupedByDay = historyByType(typeFilter).reduce<Record<string, any[]>>((acc, d: any) => {
     const date = new Date(d.createdAt)
@@ -101,20 +89,12 @@ function OutboundPage() {
           {isArticle ? <RiArticleLine className="text-2xl" /> : <RiHashtag className="text-2xl" />}
         </div>
         <h3 className="text-base font-semibold text-ink mb-1">
-          {isGenerating
-            ? isArticle
-              ? 'Generating today’s article…'
-              : 'Generating today’s social posts…'
-            : isArticle
-              ? 'No article generated yet'
-              : 'No social posts generated yet'}
+          {isArticle ? 'No article generated yet' : 'No social posts generated yet'}
         </h3>
         <p className="text-sm text-muted max-w-xs">
-          {isGenerating
-            ? 'Your content is being written and will appear here in a moment.'
-            : isArticle
-              ? 'OpenCMO writes 1 article every day. Check back after generation runs.'
-              : 'OpenCMO writes 3 social posts every day. Check back after generation runs.'}
+          {isArticle
+            ? 'OpenCMO writes 1 article every day. Check back after generation runs.'
+            : 'OpenCMO writes 3 social posts every day. Check back after generation runs.'}
         </p>
       </div>
     )
@@ -126,20 +106,15 @@ function OutboundPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-ink">Outbound Content</h1>
         <p className="mt-1 text-sm text-muted">
-          {activeProject
-            ? `Today's content for ${activeProject.name} - ready for you to post.`
-            : 'Your daily content is generated automatically.'}
+          OpenCMO writes 3 social posts and 1 article for you every day - value-first content that naturally features your product.
         </p>
       </div>
 
       {/* Generating banner */}
       {isGenerating && (
         <div className="mb-8 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
-          <RiLoader4Line className="animate-spin text-xl text-primary" />
-          <div>
-            <p className="text-sm font-semibold text-ink">Generating today's content…</p>
-            <p className="text-xs text-muted">3 social posts + 1 article. This usually takes under a minute.</p>
-          </div>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm font-semibold text-ink">Generating today's content…</p>
         </div>
       )}
 
@@ -189,7 +164,11 @@ function OutboundPage() {
             .map(([dayKey, dayDrafts]) => (
               <div key={dayKey} className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
-                  {formatDayLabel(new Date(dayKey), todayStart, yesterdayStart)}
+                  {new Date(dayKey).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
                 </h3>
                 {dayDrafts.map((draft: any) => (
                   <DraftCard key={draft.id} draft={draft} />

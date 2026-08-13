@@ -22,6 +22,7 @@ export const env = createEnv({
     DODO_INDIE_PRODUCT_ID: z.string().min(1).optional(),
     DODO_PRO_PRODUCT_ID: z.string().min(1).optional(),
     DODO_MODE: z.enum(['test_mode', 'live_mode']).optional().default('test_mode'),
+    DEMO_PROJECT_ID: z.string().min(1).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

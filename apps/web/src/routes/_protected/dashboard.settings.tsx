@@ -1,13 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Button, Card, CardBody, CardHeader, Chip, RadioGroup, Radio, Spinner, Tabs, Tab } from '@heroui/react'
 import { Input } from '#/components/Input'
+import { Textarea } from '#/components/Textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
+import { getActiveProjectId } from '#/lib/active-project'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { RiKeyLine, RiCheckLine, RiBankCardLine, RiLock2Line } from 'react-icons/ri'
+import { RiKeyLine, RiCheckLine, RiBankCardLine, RiLock2Line, RiSettingsLine } from 'react-icons/ri'
 
 export const Route = createFileRoute('/_protected/dashboard/settings')({
   component: DashboardSettingsPage,
@@ -28,9 +30,68 @@ const PROVIDERS = [
   { value: 'anthropic', label: 'Anthropic', desc: 'Claude 3.5 Haiku' },
 ] as const
 
+const projectSchema = z.object({
+  name: z.string().min(1, 'Product name is required'),
+  url: z.string().url('Please enter a valid URL'),
+  description: z.string().min(1, 'Description is required'),
+  targetAudience: z.string(),
+  keywords: z.string(),
+})
+
+type ProjectForm = z.infer<typeof projectSchema>
+
 function DashboardSettingsPage() {
   const queryClient = useQueryClient()
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const activeProjectId = getActiveProjectId() || ''
+
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+    ...orpc.listProjects.queryOptions(),
+    staleTime: 0,
+  })
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0]
+
+  const {
+    register: registerProject,
+    handleSubmit: handleProjectSubmit,
+    setValue: setProjectValue,
+    reset: resetProject,
+  } = useForm<ProjectForm>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      name: '',
+      url: '',
+      description: '',
+      targetAudience: '',
+      keywords: '',
+    },
+  })
+
+  useEffect(() => {
+    if (activeProject) {
+      resetProject({
+        name: activeProject.name,
+        url: activeProject.url ?? '',
+        description: activeProject.description,
+        targetAudience: activeProject.targetAudience ?? '',
+        keywords: (activeProject.keywords ?? []).join(', '),
+      })
+    }
+  }, [activeProject, resetProject])
+
+  const saveProjectMutation = useMutation(
+    orpc.updateProject.mutationOptions({
+      onSuccess: () => {
+        setSaveSuccess(true)
+        queryClient.invalidateQueries()
+        setTimeout(() => setSaveSuccess(false), 3000)
+      },
+      onError: (err) => {
+        console.error('🔴 Failed to save project context:', err)
+      },
+    }),
+  )
 
   const { data: apiConfig, isLoading } = useQuery({
     ...orpc.getApiConfig.queryOptions(),
@@ -73,7 +134,7 @@ function DashboardSettingsPage() {
     }),
   )
 
-  if (isLoading) {
+  if (isLoading || projectsLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Spinner size="lg" />
@@ -101,6 +162,95 @@ function DashboardSettingsPage() {
           tab: 'px-0 font-medium',
         }}
       >
+        <Tab
+          key="project"
+          title={
+            <div className="flex items-center gap-2">
+              <RiSettingsLine /> Project Context
+            </div>
+          }
+        >
+          {activeProject ? (
+            <Card className="card-surface" radius="lg">
+              <CardHeader className="px-6 pt-5 pb-0">
+                <div>
+                  <h2 className="font-semibold text-ink">{activeProject.name}</h2>
+                  <p className="mt-1 text-xs text-muted">
+                    Edit what OpenCMO knows about your product - used for inbound lead scoring, subreddit selection, and AI replies.
+                  </p>
+                </div>
+              </CardHeader>
+              <CardBody className="px-6 pb-6 pt-4">
+                <form
+                  onSubmit={handleProjectSubmit((data) =>
+                    saveProjectMutation.mutate({
+                      projectId: activeProject.id,
+                      name: data.name,
+                      url: data.url,
+                      description: data.description,
+                      targetAudience: data.targetAudience,
+                      keywords: data.keywords
+                        .split(',')
+                        .map((k) => k.trim())
+                        .filter(Boolean),
+                    }),
+                  )}
+                  className="space-y-5"
+                >
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Input label="Product Name" placeholder="Screenly" {...registerProject('name')} />
+                    <Input label="Product URL" placeholder="https://yourproduct.com" {...registerProject('url')} />
+                  </div>
+
+                  <Textarea
+                    label="Description"
+                    placeholder="What does your product do?"
+                    description="2-sentence summary used to score inbound leads."
+                    {...registerProject('description')}
+                  />
+
+                  <Textarea
+                    label="Target Audience"
+                    placeholder="Who is this for?"
+                    description="Who you sell to - used to filter relevant conversations."
+                    {...registerProject('targetAudience')}
+                  />
+
+                  <Input
+                    label="Keywords"
+                    placeholder="saas, cold email, solopreneur"
+                    description="Comma-separated marketing keywords."
+                    {...registerProject('keywords')}
+                  />
+
+                  {saveSuccess && (
+                    <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-600">
+                      <RiCheckLine className="text-base" /> Project context saved successfully!
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      type="submit"
+                      color="primary"
+                      isLoading={saveProjectMutation.isPending}
+                      className="font-medium px-8"
+                    >
+                      Save Project Context
+                    </Button>
+                  </div>
+                </form>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card className="card-surface" radius="lg">
+              <CardBody className="p-6 text-sm text-muted">
+                No project found. Create a project from the dashboard to configure its context.
+              </CardBody>
+            </Card>
+          )}
+        </Tab>
+
         <Tab
           key="api-keys"
           title={

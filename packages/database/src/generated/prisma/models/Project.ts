@@ -33,6 +33,8 @@ export type ProjectMinAggregateOutputType = {
   targetAudience: string | null
   isFetching: boolean | null
   lastFetchedAt: Date | null
+  isGeneratingContent: boolean | null
+  lastContentGeneratedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +48,8 @@ export type ProjectMaxAggregateOutputType = {
   targetAudience: string | null
   isFetching: boolean | null
   lastFetchedAt: Date | null
+  isGeneratingContent: boolean | null
+  lastContentGeneratedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +64,8 @@ export type ProjectCountAggregateOutputType = {
   keywords: number
   isFetching: number
   lastFetchedAt: number
+  isGeneratingContent: number
+  lastContentGeneratedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -75,6 +81,8 @@ export type ProjectMinAggregateInputType = {
   targetAudience?: true
   isFetching?: true
   lastFetchedAt?: true
+  isGeneratingContent?: true
+  lastContentGeneratedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +96,8 @@ export type ProjectMaxAggregateInputType = {
   targetAudience?: true
   isFetching?: true
   lastFetchedAt?: true
+  isGeneratingContent?: true
+  lastContentGeneratedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -102,6 +112,8 @@ export type ProjectCountAggregateInputType = {
   keywords?: true
   isFetching?: true
   lastFetchedAt?: true
+  isGeneratingContent?: true
+  lastContentGeneratedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -189,6 +201,8 @@ export type ProjectGroupByOutputType = {
   keywords: string[]
   isFetching: boolean
   lastFetchedAt: Date | null
+  isGeneratingContent: boolean
+  lastContentGeneratedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ProjectCountAggregateOutputType | null
@@ -224,6 +238,8 @@ export type ProjectWhereInput = {
   keywords?: Prisma.StringNullableListFilter<"Project">
   isFetching?: Prisma.BoolFilter<"Project"> | boolean
   lastFetchedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  isGeneratingContent?: Prisma.BoolFilter<"Project"> | boolean
+  lastContentGeneratedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -244,6 +260,8 @@ export type ProjectOrderByWithRelationInput = {
   keywords?: Prisma.SortOrder
   isFetching?: Prisma.SortOrder
   lastFetchedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isGeneratingContent?: Prisma.SortOrder
+  lastContentGeneratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -267,6 +285,8 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   keywords?: Prisma.StringNullableListFilter<"Project">
   isFetching?: Prisma.BoolFilter<"Project"> | boolean
   lastFetchedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  isGeneratingContent?: Prisma.BoolFilter<"Project"> | boolean
+  lastContentGeneratedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -287,6 +307,8 @@ export type ProjectOrderByWithAggregationInput = {
   keywords?: Prisma.SortOrder
   isFetching?: Prisma.SortOrder
   lastFetchedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isGeneratingContent?: Prisma.SortOrder
+  lastContentGeneratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProjectCountOrderByAggregateInput
@@ -307,6 +329,8 @@ export type ProjectScalarWhereWithAggregatesInput = {
   keywords?: Prisma.StringNullableListFilter<"Project">
   isFetching?: Prisma.BoolWithAggregatesFilter<"Project"> | boolean
   lastFetchedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+  isGeneratingContent?: Prisma.BoolWithAggregatesFilter<"Project"> | boolean
+  lastContentGeneratedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
 }
@@ -320,6 +344,8 @@ export type ProjectCreateInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -340,6 +366,8 @@ export type ProjectUncheckedCreateInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -358,6 +386,8 @@ export type ProjectUpdateInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -378,6 +408,8 @@ export type ProjectUncheckedUpdateInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -397,6 +429,8 @@ export type ProjectCreateManyInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -410,6 +444,8 @@ export type ProjectUpdateManyMutationInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -424,6 +460,8 @@ export type ProjectUncheckedUpdateManyInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -456,6 +494,8 @@ export type ProjectCountOrderByAggregateInput = {
   keywords?: Prisma.SortOrder
   isFetching?: Prisma.SortOrder
   lastFetchedAt?: Prisma.SortOrder
+  isGeneratingContent?: Prisma.SortOrder
+  lastContentGeneratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -469,6 +509,8 @@ export type ProjectMaxOrderByAggregateInput = {
   targetAudience?: Prisma.SortOrder
   isFetching?: Prisma.SortOrder
   lastFetchedAt?: Prisma.SortOrder
+  isGeneratingContent?: Prisma.SortOrder
+  lastContentGeneratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -482,6 +524,8 @@ export type ProjectMinOrderByAggregateInput = {
   targetAudience?: Prisma.SortOrder
   isFetching?: Prisma.SortOrder
   lastFetchedAt?: Prisma.SortOrder
+  isGeneratingContent?: Prisma.SortOrder
+  lastContentGeneratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -621,6 +665,8 @@ export type ProjectCreateWithoutUserInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditCreateNestedManyWithoutProjectInput
@@ -639,6 +685,8 @@ export type ProjectUncheckedCreateWithoutUserInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -687,6 +735,8 @@ export type ProjectScalarWhereInput = {
   keywords?: Prisma.StringNullableListFilter<"Project">
   isFetching?: Prisma.BoolFilter<"Project"> | boolean
   lastFetchedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  isGeneratingContent?: Prisma.BoolFilter<"Project"> | boolean
+  lastContentGeneratedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
 }
@@ -700,6 +750,8 @@ export type ProjectCreateWithoutSubredditsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -719,6 +771,8 @@ export type ProjectUncheckedCreateWithoutSubredditsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   threads?: Prisma.RedditThreadUncheckedCreateNestedManyWithoutProjectInput
@@ -752,6 +806,8 @@ export type ProjectUpdateWithoutSubredditsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -771,6 +827,8 @@ export type ProjectUncheckedUpdateWithoutSubredditsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   threads?: Prisma.RedditThreadUncheckedUpdateManyWithoutProjectNestedInput
@@ -788,6 +846,8 @@ export type ProjectCreateWithoutThreadsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -807,6 +867,8 @@ export type ProjectUncheckedCreateWithoutThreadsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -840,6 +902,8 @@ export type ProjectUpdateWithoutThreadsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -859,6 +923,8 @@ export type ProjectUncheckedUpdateWithoutThreadsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -876,6 +942,8 @@ export type ProjectCreateWithoutCursorsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -895,6 +963,8 @@ export type ProjectUncheckedCreateWithoutCursorsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -928,6 +998,8 @@ export type ProjectUpdateWithoutCursorsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -947,6 +1019,8 @@ export type ProjectUncheckedUpdateWithoutCursorsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -964,6 +1038,8 @@ export type ProjectCreateWithoutDraftsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -983,6 +1059,8 @@ export type ProjectUncheckedCreateWithoutDraftsInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -1016,6 +1094,8 @@ export type ProjectUpdateWithoutDraftsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -1035,6 +1115,8 @@ export type ProjectUncheckedUpdateWithoutDraftsInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -1052,6 +1134,8 @@ export type ProjectCreateWithoutDailyTasksInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProjectsInput
@@ -1071,6 +1155,8 @@ export type ProjectUncheckedCreateWithoutDailyTasksInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedCreateNestedManyWithoutProjectInput
@@ -1104,6 +1190,8 @@ export type ProjectUpdateWithoutDailyTasksInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -1123,6 +1211,8 @@ export type ProjectUncheckedUpdateWithoutDailyTasksInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -1140,6 +1230,8 @@ export type ProjectCreateManyUserInput = {
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   isFetching?: boolean
   lastFetchedAt?: Date | string | null
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1153,6 +1245,8 @@ export type ProjectUpdateWithoutUserInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUpdateManyWithoutProjectNestedInput
@@ -1171,6 +1265,8 @@ export type ProjectUncheckedUpdateWithoutUserInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subreddits?: Prisma.ProjectSubredditUncheckedUpdateManyWithoutProjectNestedInput
@@ -1189,6 +1285,8 @@ export type ProjectUncheckedUpdateManyWithoutUserInput = {
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   isFetching?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastFetchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isGeneratingContent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastContentGeneratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1270,6 +1368,8 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   keywords?: boolean
   isFetching?: boolean
   lastFetchedAt?: boolean
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1291,6 +1391,8 @@ export type ProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   keywords?: boolean
   isFetching?: boolean
   lastFetchedAt?: boolean
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1306,6 +1408,8 @@ export type ProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   keywords?: boolean
   isFetching?: boolean
   lastFetchedAt?: boolean
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1321,11 +1425,13 @@ export type ProjectSelectScalar = {
   keywords?: boolean
   isFetching?: boolean
   lastFetchedAt?: boolean
+  isGeneratingContent?: boolean
+  lastContentGeneratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "url" | "description" | "targetAudience" | "keywords" | "isFetching" | "lastFetchedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
+export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "url" | "description" | "targetAudience" | "keywords" | "isFetching" | "lastFetchedAt" | "isGeneratingContent" | "lastContentGeneratedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
 export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   subreddits?: boolean | Prisma.Project$subredditsArgs<ExtArgs>
@@ -1362,6 +1468,8 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     keywords: string[]
     isFetching: boolean
     lastFetchedAt: Date | null
+    isGeneratingContent: boolean
+    lastContentGeneratedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["project"]>
@@ -1802,6 +1910,8 @@ export interface ProjectFieldRefs {
   readonly keywords: Prisma.FieldRef<"Project", 'String[]'>
   readonly isFetching: Prisma.FieldRef<"Project", 'Boolean'>
   readonly lastFetchedAt: Prisma.FieldRef<"Project", 'DateTime'>
+  readonly isGeneratingContent: Prisma.FieldRef<"Project", 'Boolean'>
+  readonly lastContentGeneratedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Project", 'DateTime'>
 }

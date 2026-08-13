@@ -162,6 +162,8 @@ export const ProjectScalarFieldEnum = {
   keywords: 'keywords',
   isFetching: 'isFetching',
   lastFetchedAt: 'lastFetchedAt',
+  isGeneratingContent: 'isGeneratingContent',
+  lastContentGeneratedAt: 'lastContentGeneratedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

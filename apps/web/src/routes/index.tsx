@@ -1,12 +1,21 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { Tabs, Tab } from '@heroui/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { RiGithubLine } from 'react-icons/ri'
+import { RiGithubLine, RiInboxLine, RiVoiceprintLine, RiSendPlaneLine, RiCheckLine } from 'react-icons/ri'
 import { SiOpenai, SiClaude, SiPerplexity } from 'react-icons/si'
 import { FaReddit } from 'react-icons/fa6'
 import { Brand } from '#/components/Brand'
+import { PricingSection } from '#/components/pricing/PricingSection'
+import { ThreadCard } from '#/components/dashboard/atoms/ThreadCard'
+import { SubredditCard } from '#/components/dashboard/atoms/SubredditCard'
+import { EmptyState } from '#/components/dashboard/atoms/EmptyState'
+import { ChannelFilterPills, type ChannelKey } from '#/components/dashboard/atoms/ChannelFilterPills'
+import { DEMO_DASHBOARD_DATA } from '#/components/dashboard/demo-data'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+})
 
 const NAV_LINKS = [
   { label: 'How it works', to: '#how-it-works' },
@@ -29,10 +38,288 @@ const TITLE_GRADIENT: CSSProperties = {
   animation: 'shimmer 6s linear infinite',
 }
 
+type DemoTab = 'inbounds' | 'outbound' | 'subreddits' | 'mentions' | 'settings'
+
+function DemoDashboard({
+  tab,
+  onTabChange,
+}: {
+  tab: DemoTab
+  onTabChange: (tab: DemoTab) => void
+}) {
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [selectedChannel, setSelectedChannel] = useState<ChannelKey>('reddit')
+  const [demoName, setDemoName] = useState(DEMO_DASHBOARD_DATA.name)
+  const [demoUrl, setDemoUrl] = useState(DEMO_DASHBOARD_DATA.url)
+  const [demoDescription, setDemoDescription] = useState(DEMO_DASHBOARD_DATA.description)
+  const [demoAudience, setDemoAudience] = useState(DEMO_DASHBOARD_DATA.targetAudience)
+  const [demoKeywords, setDemoKeywords] = useState(DEMO_DASHBOARD_DATA.keywords.join(', '))
+  const [demoSaved, setDemoSaved] = useState(false)
+
+  // Per-channel counts computed from the static snapshot - no fetching
+  const counts = useMemo(() => {
+    const c: Record<ChannelKey, number> = { reddit: 0, twitter: 0, linkedin: 0 }
+    for (const t of DEMO_DASHBOARD_DATA.threads) {
+      if (t.channel === 'reddit' || t.channel === 'twitter' || t.channel === 'linkedin') c[t.channel]++
+    }
+    return c
+  }, [])
+
+  // Filter the in-memory snapshot client-side (mirrors backend listThreads ordering)
+  const threads = useMemo(() => {
+    const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
+    return DEMO_DASHBOARD_DATA.threads
+      .filter((t) => t.isDone === (activeTab === 'completed'))
+      .filter((t) => t.channel === selectedChannel)
+      .sort(
+        (a, b) =>
+          (priorityRank[a.priority ?? 'medium'] ?? 1) - (priorityRank[b.priority ?? 'medium'] ?? 1) ||
+          b.redditCreatedAt.getTime() - a.redditCreatedAt.getTime(),
+      )
+  }, [activeTab, selectedChannel])
+
+  const tabs: { key: DemoTab; label: string }[] = [
+    { key: 'inbounds', label: 'Inbounds' },
+    { key: 'outbound', label: 'Outbound' },
+    { key: 'subreddits', label: 'Subreddits' },
+    { key: 'mentions', label: 'Mentions' },
+    { key: 'settings', label: 'Settings' },
+  ]
+
+  return (
+    <div className="min-h-[520px]">
+      {/* Demo tab bar (Settings excluded) */}
+      <div className="flex items-center gap-1 border-b border-[#F0DDD7] px-5">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => onTabChange(t.key)}
+            className={[
+              '-mb-px border-b-2 px-4 py-3 text-[13px] font-semibold transition-colors',
+              tab === t.key
+                ? 'border-[#FF6F59] text-[#332A28]'
+                : 'border-transparent text-[#AA9690] hover:text-[#332A28]',
+            ].join(' ')}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="max-h-[560px] overflow-y-auto">
+        {tab === 'inbounds' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-ink">Inbounds</h1>
+                <p className="mt-1 text-sm text-muted">
+                  Monitored buying-intent posts & questions across Reddit, X, and LinkedIn
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-3">
+              <Tabs
+                selectedKey={activeTab}
+                onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed')}
+                variant="underlined"
+                color="primary"
+                classNames={{
+                  tabList: 'gap-6',
+                  cursor: 'bg-coral',
+                  tab: 'px-0 font-medium',
+                }}
+              >
+                <Tab key="active" title="Active Leads" />
+                <Tab key="completed" title="Completed" />
+              </Tabs>
+
+              <ChannelFilterPills counts={counts} selected={selectedChannel} onSelect={setSelectedChannel} />
+            </div>
+
+            {threads.length === 0 ? (
+              <EmptyState
+                icon={<RiInboxLine className="text-2xl" />}
+                title={activeTab === 'completed' ? 'No completed leads yet' : 'No active leads found'}
+                description={
+                  activeTab === 'completed'
+                    ? 'Leads marked as completed appear here.'
+                    : 'Fetch Now scans Reddit, X, and LinkedIn for buying intent conversations.'
+                }
+              />
+            ) : (
+              <div className="space-y-4">
+                {threads.slice(0, 5).map((thread) => (
+                  <ThreadCard key={thread.id} thread={thread} readOnly />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'outbound' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Outbound Post Generator</h1>
+              <p className="mt-1 text-sm text-muted">
+                Generate value-first social media posts that naturally feature your SaaS product without triggering ban filters.
+              </p>
+            </div>
+            <EmptyState
+              icon={<RiSendPlaneLine className="text-2xl" />}
+              title="No drafts generated yet"
+              description="Drafts you generate with the Outbound Post Generator will appear here."
+            />
+          </div>
+        )}
+
+        {tab === 'subreddits' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Subreddit Communities</h1>
+              <p className="mt-1 text-sm text-muted">
+                Monitored target subreddits for {DEMO_DASHBOARD_DATA.name}
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {DEMO_DASHBOARD_DATA.subreddits.map((sub) => (
+                <SubredditCard key={sub.id} subreddit={sub} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'mentions' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Brand Mentions</h1>
+              <p className="mt-1 text-sm text-muted">
+                Discover what people are talking about {DEMO_DASHBOARD_DATA.name} across socials - auto-categorized so you never miss a signal.
+              </p>
+            </div>
+<div className="mb-8 overflow-hidden rounded-2xl border border-coral/20 bg-gradient-to-br from-coral/10 via-white to-purple-100/40 p-8">
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+                    <RiVoiceprintLine className="text-3xl" />
+                  </div>
+                  <span className="mb-3 rounded-full bg-coral/10 px-3 py-1 text-xs font-semibold text-coral-dark">
+                    Coming Soon
+                  </span>
+                  <h2 className="text-xl font-bold tracking-tight text-ink">
+                    Brand mentions radar is on the way
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+                    We're scanning Reddit, X, and LinkedIn for conversations about {DEMO_DASHBOARD_DATA.name}. When someone
+                    is discussing a bug, asking for a feature, or singing your praises - you'll see it here,
+                    auto-tagged into categories.
+                  </p>
+                </div>
+              </div>
+            </div>
+        )}
+
+        {tab === 'settings' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Settings</h1>
+              <p className="mt-1 text-sm text-muted">Project context - what OpenCMO knows about your product</p>
+            </div>
+            <div className="rounded-2xl border border-line bg-card p-6">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setDemoSaved(true)
+                  setTimeout(() => setDemoSaved(false), 3000)
+                }}
+                className="space-y-5"
+              >
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-faint">
+                      Product Name
+                    </label>
+                    <input
+                      value={demoName}
+                      onChange={(e) => setDemoName(e.target.value)}
+                      className="control-outline w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-faint">
+                      Product URL
+                    </label>
+                    <input
+                      value={demoUrl}
+                      onChange={(e) => setDemoUrl(e.target.value)}
+                      className="control-outline w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-faint">
+                    Description
+                  </label>
+                  <textarea
+                    value={demoDescription}
+                    onChange={(e) => setDemoDescription(e.target.value)}
+                    rows={3}
+                    className="control-outline w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-faint">
+                    Target Audience
+                  </label>
+                  <textarea
+                    value={demoAudience}
+                    onChange={(e) => setDemoAudience(e.target.value)}
+                    rows={2}
+                    className="control-outline w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-faint">
+                    Keywords
+                  </label>
+                  <input
+                    value={demoKeywords}
+                    onChange={(e) => setDemoKeywords(e.target.value)}
+                    placeholder="saas, cold email, solopreneur"
+                    className="control-outline w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                  />
+                </div>
+
+                {demoSaved && (
+                  <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-600">
+                    <RiCheckLine className="text-base" /> Project context saved (preview)
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    className="rounded-full bg-coral px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+                  >
+                    Save Project Context
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function Home() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [logosDropped, setLogosDropped] = useState(false)
   const [redditDropped, setRedditDropped] = useState(false)
+  const [demoTab, setDemoTab] = useState<DemoTab>('inbounds')
   const titleRef = useRef<HTMLHeadingElement>(null)
   const logosRef = useRef<HTMLSpanElement>(null)
   const redditRef = useRef<HTMLSpanElement>(null)
@@ -344,9 +631,7 @@ function Home() {
                 <span className="text-[10px] font-medium text-[#9A8B85]">connected · your AI</span>
               </div>
             </div>
-            <div className="flex items-center justify-center py-24 text-sm text-[#C8B4AC]">
-              Your workspace preview
-            </div>
+              <DemoDashboard tab={demoTab} onTabChange={setDemoTab} />
           </div>
         </div>
       </section>
@@ -400,92 +685,7 @@ function Home() {
       {/* ── Pricing ──────────────────────────────────────────────────────── */}
       <section className="border-t border-[#F2E8E3] py-16">
         <div className="mx-auto max-w-3xl px-6">
-          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#B8A29B]">
-            Pricing
-          </p>
-          <h2 className="mb-2 text-center text-3xl font-semibold tracking-tight text-[#332A28]">
-            Simple, honest pricing
-          </h2>
-          <p className="mb-12 text-center text-sm text-[#806F69]">
-            All plans include BYOK. No per-seat nonsense.
-          </p>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            {[
-              {
-                name: 'Indie',
-                price: '$5',
-                features: [
-                  'Bring Your Own AI Key (BYOK)',
-                  '1 Product',
-                  '200 inbounds / month',
-                  '10 subreddits monitored',
-                  'Background polling (every 6h)',
-                  'Ban Sentinel risk scoring',
-                ],
-                popular: false,
-              },
-              {
-                name: 'Pro',
-                price: '$39',
-                features: [
-                  'Hosted AI Included (No API key needed)',
-                  'Up to 5 Products',
-                  'Unlimited inbounds',
-                  'Unlimited subreddits',
-                  'Fast background polling (every 2h)',
-                  'Priority support',
-                ],
-                popular: true,
-              },
-            ].map(({ name, price, features, popular }) => (
-              <div
-                key={name}
-                className={[
-                  'relative flex flex-col gap-5 rounded-2xl p-7',
-                  popular
-                    ? 'border border-[#FF6F59] bg-[#FFFDFC] shadow-[0_8px_28px_rgba(255,111,89,0.14)]'
-                    : 'border border-[#F0DDD7] bg-[#FFFDFC]',
-                ].join(' ')}
-              >
-                {popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#FF6F59] px-3 py-0.5 text-xs font-semibold text-white">
-                    Most popular
-                  </span>
-                )}
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#B8A29B]">{name}</p>
-                  <p className="text-4xl font-semibold tracking-tight text-[#332A28]">
-                    {price}
-                    <span className="text-lg font-normal text-[#AA9690]">/mo</span>
-                  </p>
-                </div>
-                <ul className="flex flex-col gap-2.5">
-                  {features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-[#6d5f59]">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF6F59]" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/login" className="mt-auto">
-                  <span
-                    className={[
-                      'flex h-10 items-center justify-center rounded-full text-[13px] font-semibold no-underline transition-all duration-200 hover:-translate-y-px',
-                      popular
-                        ? 'bg-[#FF6F59] text-white shadow-[0_6px_16px_rgba(255,111,89,0.18)] hover:bg-[#F87563]'
-                        : 'border border-[#E9D4CD] text-[#756661] hover:border-[#E0C4BC]',
-                    ].join(' ')}
-                  >
-                    Get started
-                  </span>
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-6 text-center text-xs text-[#AA9690]">
-            Self-host for free · <a href="https://github.com" className="underline hover:text-[#806F69]">View on GitHub</a>
-          </p>
+          <PricingSection />
         </div>
       </section>
 

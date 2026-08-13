@@ -1,28 +1,31 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { prisma } from '@repo/database'
-import { dodo } from '#/lib/dodo'
+import { dodo } from '@repo/backend'
 import type { UnwrapWebhookEvent } from 'dodopayments/resources/webhooks'
+import type { Request, Response } from 'express'
 
 /**
- * Dodo Payments webhook handler at POST /api/webhook/dodo (Quickfeed pattern)
+ * Dodo Payments webhook handler at POST /api/webhook/dodo.
+ * Registered with express.text() BEFORE the global json() parser so the raw
+ * body is preserved for signature verification.
  */
-async function handle({ request }: { request: Request }) {
+export async function handleDodoWebhook(req: Request, res: Response): Promise<void> {
   try {
-    const body = await request.text()
+    const body = req.body as string
 
     // Convert Headers to plain object for dodopayments SDK
     const headersObj: Record<string, string> = {}
-    request.headers.forEach((value, key) => {
-      headersObj[key] = value
-    })
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (typeof value === 'string') headersObj[key] = value
+      else if (Array.isArray(value)) headersObj[key] = value.join(', ')
+    }
 
-    // Verify + parse webhook via SDK
     let event: UnwrapWebhookEvent
     try {
       event = dodo.webhooks.unwrap(body, { headers: headersObj })
     } catch (err) {
       console.error('[webhook] signature verification failed:', err)
-      return new Response('Invalid signature', { status: 401 })
+      res.status(401).send('Invalid signature')
+      return
     }
 
     console.log('[webhook] received event:', event.type)
@@ -100,17 +103,9 @@ async function handle({ request }: { request: Request }) {
         console.log('[webhook] unhandled event type:', (event as any).type)
     }
 
-    return new Response('ok', { status: 200 })
+    res.status(200).send('ok')
   } catch (err) {
     console.error('[webhook] error:', err)
-    return new Response('Internal error', { status: 500 })
+    res.status(500).send('Internal error')
   }
 }
-
-export const Route = createFileRoute('/api/webhook/dodo')({
-  server: {
-    handlers: {
-      POST: handle,
-    },
-  },
-})

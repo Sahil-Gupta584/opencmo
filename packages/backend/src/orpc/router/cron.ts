@@ -2,6 +2,7 @@ import { ORPCError } from '@orpc/client'
 import { prisma } from '@repo/database'
 import { env } from '../../env.js'
 import { fetchInboundsForProject } from '../../inbounds-service.js'
+import { generateDailyContentForProject } from '../../daily-content.js'
 import { sendNewLeadsEmail } from '../../notifications.js'
 import { base } from '../middleware.js'
 
@@ -53,4 +54,31 @@ export const runFetchCycle = cronAuthed.handler(async () => {
   )
 
   return { projects: projects.length, totalNewLeads, durationMs }
+})
+
+export const runDailyContentCycle = cronAuthed.handler(async () => {
+  const startedAt = Date.now()
+  const projects = await prisma.project.findMany({ select: { id: true, name: true } })
+  console.log(`[Cron] Generating daily content for ${projects.length} projects...`)
+
+  let totalGenerated = 0
+  let skippedCount = 0
+
+  for (const project of projects) {
+    try {
+      const result = await generateDailyContentForProject(project.id)
+      totalGenerated += result.generated
+      if (result.skipped) skippedCount += 1
+      console.log(`[Cron] ${project.name}: ${result.generated} item(s) generated${result.skipped ? ' (skipped - already generating or done within 24h)' : ''}`)
+    } catch (err) {
+      console.error(`🔴 [Cron] Failed to generate content for project ${project.id} (${project.name}):`, err)
+    }
+  }
+
+  const durationMs = Date.now() - startedAt
+  console.log(
+    `[Cron] Content cycle done in ${(durationMs / 1000).toFixed(1)}s - ${totalGenerated} items generated, ${skippedCount} projects skipped`,
+  )
+
+  return { projects: projects.length, totalGenerated, skippedCount, durationMs }
 })

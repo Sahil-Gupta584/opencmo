@@ -11,10 +11,10 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "check-types": "turbo run check-types",
-    "db:generate": "npm run db:generate --workspace=web",
-    "db:migrate": "npm run db:migrate --workspace=web",
-    "db:studio": "npm run db:studio --workspace=web",
-    "db:seed": "npm run db:seed --workspace=web"
+    "db:generate": "npm run db:generate --workspace=@repo/database",
+    "db:migrate": "npm run db:migrate --workspace=@repo/database",
+    "db:studio": "npm run db:studio --workspace=@repo/database",
+    "db:seed": "npm run db:seed --workspace=@repo/database"
   },
   "devDependencies": {
     "prettier": "^3.6.0",

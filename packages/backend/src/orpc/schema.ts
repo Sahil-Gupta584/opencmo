@@ -22,14 +22,27 @@ export const CreateProjectSchema = z.object({
   socialPostTypes: z.array(z.string()).optional(),
 })
 
-export const GenerateDraftSchema = z.object({
+export const UpdateProjectSchema = z.object({
   projectId: z.string(),
-  subreddit: z.string(),
-  prompt: z.string().optional(),
+  name: z.string().min(1, 'Product name is required').optional(),
+  url: z.string().url('Please enter a valid URL').optional(),
+  description: z.string().min(1, 'Description is required').optional(),
+  targetAudience: z.string().optional(),
+  keywords: z.array(z.string()).optional(),
 })
 
 export const RefreshSubredditsSchema = z.object({
   projectId: z.string(),
+})
+
+export const AddSubredditSchema = z.object({
+  projectId: z.string(),
+  name: z.string().min(1, 'Subreddit name is required'),
+})
+
+export const RemoveSubredditSchema = z.object({
+  projectId: z.string(),
+  name: z.string().min(1, 'Subreddit name is required'),
 })
 
 export const FetchInboundsSchema = z.object({

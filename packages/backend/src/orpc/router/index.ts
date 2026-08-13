@@ -1,10 +1,11 @@
 import { addTodo, listTodos } from './todos'
 import { getApiConfig, saveApiConfig } from './api-config'
-import { listProjects, createProject, analyzeProduct, generateDraft, refreshSubreddits } from './projects'
+import { listProjects, createProject, analyzeProduct, updateProject, refreshSubreddits, addSubreddit, removeSubreddit } from './projects'
 import { fetchInbounds, listThreads, listThreadCounts, updateThreadStatus, generateThreadReply } from './inbounds'
 import { getNotificationPref, saveNotificationPref } from './notifications'
 import { createCheckout, getSubscription } from './billing'
-import { runFetchCycle } from './cron'
+import { runFetchCycle, runDailyContentCycle } from './cron'
+import { listProjects as demoListProjects } from './demo'
 
 export default {
   listTodos,
@@ -14,8 +15,10 @@ export default {
   listProjects,
   createProject,
   analyzeProduct,
-  generateDraft,
+  updateProject,
   refreshSubreddits,
+  addSubreddit,
+  removeSubreddit,
   fetchInbounds,
   listThreads,
   listThreadCounts,
@@ -26,5 +29,9 @@ export default {
   createCheckout,
   getSubscription,
   runFetchCycle,
+  runDailyContentCycle,
+  demo: {
+    listProjects: demoListProjects,
+  },
 }
 

@@ -24,7 +24,6 @@ import { Route as ProtectedDashboardOutboundRouteImport } from './routes/_protec
 import { Route as ProtectedDashboardSettingsRouteImport } from './routes/_protected/dashboard.settings'
 import { Route as ProtectedDashboardSubredditsRouteImport } from './routes/_protected/dashboard.subreddits'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiWebhookDodoRouteImport } from './routes/api/webhook/dodo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -105,11 +104,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiWebhookDodoRoute = ApiWebhookDodoRouteImport.update({
-  id: '/api/webhook/dodo',
-  path: '/api/webhook/dodo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -125,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof ProtectedDashboardSettingsRoute
   '/dashboard/subreddits': typeof ProtectedDashboardSubredditsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/webhook/dodo': typeof ApiWebhookDodoRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,7 +134,6 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof ProtectedDashboardSettingsRoute
   '/dashboard/subreddits': typeof ProtectedDashboardSubredditsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/webhook/dodo': typeof ApiWebhookDodoRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -160,7 +152,6 @@ export interface FileRoutesById {
   '/_protected/dashboard/settings': typeof ProtectedDashboardSettingsRoute
   '/_protected/dashboard/subreddits': typeof ProtectedDashboardSubredditsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/webhook/dodo': typeof ApiWebhookDodoRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/subreddits'
     | '/api/auth/$'
-    | '/api/webhook/dodo'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -195,7 +185,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/subreddits'
     | '/api/auth/$'
-    | '/api/webhook/dodo'
     | '/dashboard'
   id:
     | '__root__'
@@ -213,7 +202,6 @@ export interface FileRouteTypes {
     | '/_protected/dashboard/settings'
     | '/_protected/dashboard/subreddits'
     | '/api/auth/$'
-    | '/api/webhook/dodo'
     | '/_protected/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -224,7 +212,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiWebhookDodoRoute: typeof ApiWebhookDodoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -334,13 +321,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/webhook/dodo': {
-      id: '/api/webhook/dodo'
-      path: '/api/webhook/dodo'
-      fullPath: '/api/webhook/dodo'
-      preLoaderRoute: typeof ApiWebhookDodoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -388,7 +368,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiWebhookDodoRoute: ApiWebhookDodoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

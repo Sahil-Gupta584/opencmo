@@ -505,7 +505,7 @@ function Home() {
 
     let raf = 0
     let startTime = 0
-    const startDelay = 750
+    const startDelay = 0
     const duration = 2400
     let logosFrac = 0.45
     let redditFrac = 0.9

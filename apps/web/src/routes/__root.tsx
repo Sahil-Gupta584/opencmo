@@ -13,7 +13,7 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
-const siteUrl = env.BETTER_AUTH_URL || 'http://localhost:3000'
+const siteUrl = env.VITE_BETTER_AUTH_URL || 'http://localhost:3000'
 const ogImageUrl = `${siteUrl}/og.png`
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

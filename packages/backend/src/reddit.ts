@@ -116,7 +116,7 @@ async function fetchSubredditAboutJSON(
       headers: {
         'User-Agent': REDDIT_USER_AGENT,
         Accept: 'application/json',
-        ...(env.REDDIT_LOID ? { Cookie: `loid=${env.REDDIT_LOID}; csv=2` } : {}),
+       Cookie: env.REDDIT_COOKIE ,
       },
     })
 
@@ -302,7 +302,7 @@ async function fetchRedditSearchJSON(
       headers: {
         'User-Agent': REDDIT_USER_AGENT,
         Accept: 'application/json',
-        Cookie: `loid=${env.REDDIT_LOID}; csv=2`,
+        Cookie: env.REDDIT_COOKIE,
       },
     })
     updateChannelState('json', res)

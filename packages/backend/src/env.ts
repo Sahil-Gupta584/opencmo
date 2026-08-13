@@ -12,7 +12,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     FIRECRAWL_API_KEY: z.string().min(1).optional(),
-    REDDIT_LOID: z.string().min(1),
+    REDDIT_COOKIE: z.string().min(1),
     NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
     TWITTER_BEARER_TOKEN: z.string().min(1).optional(),
     X_HOST: z.string().min(1).optional(),

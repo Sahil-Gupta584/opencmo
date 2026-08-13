@@ -1,5 +1,5 @@
 zerops:
-  - setup: api
+  - setup: nodejs
     build:
       base: nodejs@22
       os: ubuntu

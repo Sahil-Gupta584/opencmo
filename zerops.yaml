@@ -1,0 +1,55 @@
+zerops:
+  - setup: api
+    build:
+      base: nodejs@22
+      os: ubuntu
+      buildCommands:
+        - npm install
+        - npm run db:generate --workspace=database
+        - npm run build --workspace=api
+      deployFiles:
+        - apps/api/dist
+        - apps/api/package.json
+        - package.json
+        - package-lock.json
+        - node_modules
+        - packages
+      cache:
+        - node_modules
+    run:
+      base: nodejs@22
+      os: ubuntu
+      ports:
+        - port: 5001
+          httpSupport: true
+      start: npm start
+      healthCheck:
+        httpGet:
+          port: 5001
+          path: /status
+      crontab:
+        - command: node dist/cron/fetch-inbounds.cjs
+          timing: "0 */4 * * *"
+          allContainers: false
+          workingDir: /var/www/apps/api
+      envVariables:
+        NODE_ENV: production
+        PORT: "5001"
+        API_URL: "http://localhost:5001"
+        DATABASE_URL: ${DATABASE_URL}
+        BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+        WEB_URL: ${WEB_URL}
+        CORS_ORIGIN: ${WEB_URL}
+        CRON_SECRET: ${CRON_SECRET}
+        REDDIT_LOID: ${REDDIT_LOID}
+        RESEND_API_KEY: ${RESEND_API_KEY}
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY}
+        TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
+        DODO_API_KEY: ${DODO_API_KEY}
+        DODO_WEBHOOK_SECRET: ${DODO_WEBHOOK_SECRET}
+        DODO_INDIE_PRODUCT_ID: ${DODO_INDIE_PRODUCT_ID}
+        DODO_PRO_PRODUCT_ID: ${DODO_PRO_PRODUCT_ID}
+        DODO_MODE: ${DODO_MODE}

@@ -1,0 +1,36 @@
+{
+  "name": "@repo/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./router": "./src/orpc/router/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@orpc/client": "^1.13.6",
+    "@orpc/json-schema": "^1.13.6",
+    "@orpc/openapi": "^1.13.6",
+    "@orpc/server": "^1.13.6",
+    "@orpc/zod": "^1.13.6",
+    "@repo/database": "*",
+    "@t3-oss/env-core": "^0.13.10",
+    "better-auth": "^1.5.3",
+    "dodopayments": "2.45.1",
+    "resend": "6.13.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.39.0",
+    "tsdown": "^0.12.0",
+    "typescript": "^5.9.3"
+  }
+}

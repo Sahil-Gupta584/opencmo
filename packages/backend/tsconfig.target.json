@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/index.ts",
+    "src/reddit.ts",
+    "src/inbounds-service.ts",
+    "src/inbounds-evaluator.ts",
+    "src/notifications.ts",
+    "src/orpc/router/index.ts",
+    "src/orpc/router/cron.ts",
+    "src/orpc/router/inbounds.ts",
+    "src/orpc/router/projects.ts",
+    "src/orpc/middleware.ts"
+  ],
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__exa__web_search_exa",
+      "PowerShell(npm run db:generate)",
+      "PowerShell(npx prisma generate)",
+      "PowerShell($env:DATABASE_URL=\"postgresql://postgres:GZYk6mblgz6Lt5Nq@db.pabarkwegbrrfksntvss.supabase.co:5432/postgres\"; npm run db:push)",
+      "PowerShell(npm run db:push)",
+      "PowerShell(npx prisma migrate dev --name baseline --create-only)",
+      "PowerShell($env:DATABASE_URL='postgresql://postgres.pabarkwegbrrfksntvss:GZYk6mblgz6Lt5Nq@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?schema=opencmo'; New-Item -ItemType Directory -Path \"C:\\\\s\\\\opencmo\\\\prisma\\\\migrations\\\\20260804000000_baseline\" -Force | Out-Null; npx prisma migrate diff --from-empty --to-schema \"C:\\\\s\\\\opencmo\\\\prisma\\\\schema.prisma\" --script | Out-File -FilePath \"C:\\\\s\\\\opencmo\\\\prisma\\\\migrations\\\\20260804000000_baseline\\\\migration.sql\" -Encoding utf8; npx prisma migrate resolve --applied 20260804000000_baseline)"
+    ]
+  }
+}

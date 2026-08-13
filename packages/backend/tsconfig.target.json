@@ -12,6 +12,7 @@
     "src/orpc/router/inbounds.ts",
     "src/orpc/router/projects.ts",
     "src/orpc/router/demo.ts",
+    "src/orpc/router/prefs.ts",
     "src/orpc/middleware.ts"
   ],
   "compilerOptions": {

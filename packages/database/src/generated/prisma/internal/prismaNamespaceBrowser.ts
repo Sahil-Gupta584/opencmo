@@ -62,7 +62,9 @@ export const ModelName = {
   RedditThread: 'RedditThread',
   InboundCursor: 'InboundCursor',
   ContentDraft: 'ContentDraft',
-  DailyTask: 'DailyTask'
+  DailyTask: 'DailyTask',
+  FeatureInterest: 'FeatureInterest',
+  AlertPref: 'AlertPref'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -265,6 +267,32 @@ export const DailyTaskScalarFieldEnum = {
 } as const
 
 export type DailyTaskScalarFieldEnum = (typeof DailyTaskScalarFieldEnum)[keyof typeof DailyTaskScalarFieldEnum]
+
+
+export const FeatureInterestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  feature: 'feature',
+  interested: 'interested',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeatureInterestScalarFieldEnum = (typeof FeatureInterestScalarFieldEnum)[keyof typeof FeatureInterestScalarFieldEnum]
+
+
+export const AlertPrefScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  emailEnabled: 'emailEnabled',
+  notifyInbounds: 'notifyInbounds',
+  notifyOutbound: 'notifyOutbound',
+  channels: 'channels',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlertPrefScalarFieldEnum = (typeof AlertPrefScalarFieldEnum)[keyof typeof AlertPrefScalarFieldEnum]
 
 
 export const SortOrder = {

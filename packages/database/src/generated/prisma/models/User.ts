@@ -234,6 +234,8 @@ export type UserWhereInput = {
   accounts?: Prisma.AccountListRelationFilter
   projects?: Prisma.ProjectListRelationFilter
   apiConfig?: Prisma.XOR<Prisma.UserApiConfigNullableScalarRelationFilter, Prisma.UserApiConfigWhereInput> | null
+  featureInterests?: Prisma.FeatureInterestListRelationFilter
+  alertPref?: Prisma.XOR<Prisma.AlertPrefNullableScalarRelationFilter, Prisma.AlertPrefWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -252,6 +254,8 @@ export type UserOrderByWithRelationInput = {
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   projects?: Prisma.ProjectOrderByRelationAggregateInput
   apiConfig?: Prisma.UserApiConfigOrderByWithRelationInput
+  featureInterests?: Prisma.FeatureInterestOrderByRelationAggregateInput
+  alertPref?: Prisma.AlertPrefOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +277,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   accounts?: Prisma.AccountListRelationFilter
   projects?: Prisma.ProjectListRelationFilter
   apiConfig?: Prisma.XOR<Prisma.UserApiConfigNullableScalarRelationFilter, Prisma.UserApiConfigWhereInput> | null
+  featureInterests?: Prisma.FeatureInterestListRelationFilter
+  alertPref?: Prisma.XOR<Prisma.AlertPrefNullableScalarRelationFilter, Prisma.AlertPrefWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -325,6 +331,8 @@ export type UserCreateInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -343,6 +351,8 @@ export type UserUncheckedCreateInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -361,6 +371,8 @@ export type UserUpdateInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -379,6 +391,8 @@ export type UserUncheckedUpdateInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -534,6 +548,34 @@ export type UserUpdateOneRequiredWithoutApiConfigNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutApiConfigInput, Prisma.UserUpdateWithoutApiConfigInput>, Prisma.UserUncheckedUpdateWithoutApiConfigInput>
 }
 
+export type UserCreateNestedOneWithoutFeatureInterestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFeatureInterestsInput, Prisma.UserUncheckedCreateWithoutFeatureInterestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFeatureInterestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutFeatureInterestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFeatureInterestsInput, Prisma.UserUncheckedCreateWithoutFeatureInterestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFeatureInterestsInput
+  upsert?: Prisma.UserUpsertWithoutFeatureInterestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFeatureInterestsInput, Prisma.UserUpdateWithoutFeatureInterestsInput>, Prisma.UserUncheckedUpdateWithoutFeatureInterestsInput>
+}
+
+export type UserCreateNestedOneWithoutAlertPrefInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertPrefInput, Prisma.UserUncheckedCreateWithoutAlertPrefInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertPrefInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAlertPrefNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertPrefInput, Prisma.UserUncheckedCreateWithoutAlertPrefInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertPrefInput
+  upsert?: Prisma.UserUpsertWithoutAlertPrefInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlertPrefInput, Prisma.UserUpdateWithoutAlertPrefInput>, Prisma.UserUncheckedUpdateWithoutAlertPrefInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id: string
   name: string
@@ -549,6 +591,8 @@ export type UserCreateWithoutSessionsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -566,6 +610,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -599,6 +645,8 @@ export type UserUpdateWithoutSessionsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -616,6 +664,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -633,6 +683,8 @@ export type UserCreateWithoutAccountsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -650,6 +702,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -683,6 +737,8 @@ export type UserUpdateWithoutAccountsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -700,6 +756,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProjectsInput = {
@@ -717,6 +775,8 @@ export type UserCreateWithoutProjectsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProjectsInput = {
@@ -734,6 +794,8 @@ export type UserUncheckedCreateWithoutProjectsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProjectsInput = {
@@ -767,6 +829,8 @@ export type UserUpdateWithoutProjectsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProjectsInput = {
@@ -784,6 +848,8 @@ export type UserUncheckedUpdateWithoutProjectsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutApiConfigInput = {
@@ -801,6 +867,8 @@ export type UserCreateWithoutApiConfigInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutApiConfigInput = {
@@ -818,6 +886,8 @@ export type UserUncheckedCreateWithoutApiConfigInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutApiConfigInput = {
@@ -851,6 +921,8 @@ export type UserUpdateWithoutApiConfigInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApiConfigInput = {
@@ -868,6 +940,192 @@ export type UserUncheckedUpdateWithoutApiConfigInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutFeatureInterestsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  subscriptionId?: string | null
+  subscriptionStatus?: string | null
+  plan?: string | null
+  notifyNewLeads?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
+  apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  alertPref?: Prisma.AlertPrefCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutFeatureInterestsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  subscriptionId?: string | null
+  subscriptionStatus?: string | null
+  plan?: string | null
+  notifyNewLeads?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
+  apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  alertPref?: Prisma.AlertPrefUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutFeatureInterestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFeatureInterestsInput, Prisma.UserUncheckedCreateWithoutFeatureInterestsInput>
+}
+
+export type UserUpsertWithoutFeatureInterestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFeatureInterestsInput, Prisma.UserUncheckedUpdateWithoutFeatureInterestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFeatureInterestsInput, Prisma.UserUncheckedCreateWithoutFeatureInterestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFeatureInterestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFeatureInterestsInput, Prisma.UserUncheckedUpdateWithoutFeatureInterestsInput>
+}
+
+export type UserUpdateWithoutFeatureInterestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyNewLeads?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
+  apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFeatureInterestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyNewLeads?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
+  apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  alertPref?: Prisma.AlertPrefUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAlertPrefInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  subscriptionId?: string | null
+  subscriptionStatus?: string | null
+  plan?: string | null
+  notifyNewLeads?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
+  apiConfig?: Prisma.UserApiConfigCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAlertPrefInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  subscriptionId?: string | null
+  subscriptionStatus?: string | null
+  plan?: string | null
+  notifyNewLeads?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
+  apiConfig?: Prisma.UserApiConfigUncheckedCreateNestedOneWithoutUserInput
+  featureInterests?: Prisma.FeatureInterestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAlertPrefInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertPrefInput, Prisma.UserUncheckedCreateWithoutAlertPrefInput>
+}
+
+export type UserUpsertWithoutAlertPrefInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAlertPrefInput, Prisma.UserUncheckedUpdateWithoutAlertPrefInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertPrefInput, Prisma.UserUncheckedCreateWithoutAlertPrefInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAlertPrefInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAlertPrefInput, Prisma.UserUncheckedUpdateWithoutAlertPrefInput>
+}
+
+export type UserUpdateWithoutAlertPrefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyNewLeads?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
+  apiConfig?: Prisma.UserApiConfigUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAlertPrefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyNewLeads?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
+  apiConfig?: Prisma.UserApiConfigUncheckedUpdateOneWithoutUserNestedInput
+  featureInterests?: Prisma.FeatureInterestUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -879,12 +1137,14 @@ export type UserCountOutputType = {
   sessions: number
   accounts: number
   projects: number
+  featureInterests: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   projects?: boolean | UserCountOutputTypeCountProjectsArgs
+  featureInterests?: boolean | UserCountOutputTypeCountFeatureInterestsArgs
 }
 
 /**
@@ -918,6 +1178,13 @@ export type UserCountOutputTypeCountProjectsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.ProjectWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFeatureInterestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FeatureInterestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -935,6 +1202,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   apiConfig?: boolean | Prisma.User$apiConfigArgs<ExtArgs>
+  featureInterests?: boolean | Prisma.User$featureInterestsArgs<ExtArgs>
+  alertPref?: boolean | Prisma.User$alertPrefArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -986,6 +1255,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   apiConfig?: boolean | Prisma.User$apiConfigArgs<ExtArgs>
+  featureInterests?: boolean | Prisma.User$featureInterestsArgs<ExtArgs>
+  alertPref?: boolean | Prisma.User$alertPrefArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -998,6 +1269,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     projects: Prisma.$ProjectPayload<ExtArgs>[]
     apiConfig: Prisma.$UserApiConfigPayload<ExtArgs> | null
+    featureInterests: Prisma.$FeatureInterestPayload<ExtArgs>[]
+    alertPref: Prisma.$AlertPrefPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1409,6 +1682,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projects<T extends Prisma.User$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   apiConfig<T extends Prisma.User$apiConfigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$apiConfigArgs<ExtArgs>>): Prisma.Prisma__UserApiConfigClient<runtime.Types.Result.GetResult<Prisma.$UserApiConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  featureInterests<T extends Prisma.User$featureInterestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$featureInterestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeatureInterestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alertPref<T extends Prisma.User$alertPrefArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alertPrefArgs<ExtArgs>>): Prisma.Prisma__AlertPrefClient<runtime.Types.Result.GetResult<Prisma.$AlertPrefPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1930,6 +2205,49 @@ export type User$apiConfigArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.UserApiConfigInclude<ExtArgs> | null
   where?: Prisma.UserApiConfigWhereInput
+}
+
+/**
+ * User.featureInterests
+ */
+export type User$featureInterestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FeatureInterest
+   */
+  select?: Prisma.FeatureInterestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FeatureInterest
+   */
+  omit?: Prisma.FeatureInterestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FeatureInterestInclude<ExtArgs> | null
+  where?: Prisma.FeatureInterestWhereInput
+  orderBy?: Prisma.FeatureInterestOrderByWithRelationInput | Prisma.FeatureInterestOrderByWithRelationInput[]
+  cursor?: Prisma.FeatureInterestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FeatureInterestScalarFieldEnum | Prisma.FeatureInterestScalarFieldEnum[]
+}
+
+/**
+ * User.alertPref
+ */
+export type User$alertPrefArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AlertPref
+   */
+  select?: Prisma.AlertPrefSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AlertPref
+   */
+  omit?: Prisma.AlertPrefOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AlertPrefInclude<ExtArgs> | null
+  where?: Prisma.AlertPrefWhereInput
 }
 
 /**

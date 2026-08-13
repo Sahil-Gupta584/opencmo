@@ -30,6 +30,8 @@ model User {
   accounts           Account[]
   projects           Project[]
   apiConfig          UserApiConfig?
+  featureInterests   FeatureInterest[]
+  alertPref          AlertPref?
 
   @@unique([email])
   @@map("user")
@@ -212,4 +214,31 @@ model DailyTask {
   createdAt   DateTime @default(now())
 
   @@map("daily_task")
+}
+
+model FeatureInterest {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature    String   // e.g. "mentions"
+  interested Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, feature])
+  @@map("feature_interest")
+}
+
+model AlertPref {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailEnabled   Boolean  @default(true)
+  notifyInbounds Boolean  @default(true)
+  notifyOutbound Boolean  @default(true)
+  channels       String[] // requested channels: whatsapp, slack, discord, or custom
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("alert_pref")
 }

@@ -71,3 +71,14 @@ export const GenerateThreadReplySchema = z.object({
 export const SaveNotificationPrefSchema = z.object({
   notifyNewLeads: z.boolean(),
 })
+
+export const SaveMentionsInterestSchema = z.object({
+  feature: z.string().min(1),
+  interested: z.boolean(),
+})
+
+export const SaveAlertPrefSchema = z.object({
+  notifyInbounds: z.boolean(),
+  notifyOutbound: z.boolean(),
+  channels: z.array(z.string()),
+})

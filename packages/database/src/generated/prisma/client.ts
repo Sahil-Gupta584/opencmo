@@ -101,3 +101,13 @@ export type ContentDraft = Prisma.ContentDraftModel
  * 
  */
 export type DailyTask = Prisma.DailyTaskModel
+/**
+ * Model FeatureInterest
+ * 
+ */
+export type FeatureInterest = Prisma.FeatureInterestModel
+/**
+ * Model AlertPref
+ * 
+ */
+export type AlertPref = Prisma.AlertPrefModel

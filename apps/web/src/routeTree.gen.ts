@@ -18,6 +18,7 @@ import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dash
 import { Route as ProtectedNewRouteImport } from './routes/_protected/new'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard.index'
+import { Route as ProtectedDashboardAlertsRouteImport } from './routes/_protected/dashboard.alerts'
 import { Route as ProtectedDashboardInboundsRouteImport } from './routes/_protected/dashboard.inbounds'
 import { Route as ProtectedDashboardMentionsRouteImport } from './routes/_protected/dashboard.mentions'
 import { Route as ProtectedDashboardOutboundRouteImport } from './routes/_protected/dashboard.outbound'
@@ -69,6 +70,12 @@ const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedDashboardRoute,
 } as any)
+const ProtectedDashboardAlertsRoute =
+  ProtectedDashboardAlertsRouteImport.update({
+    id: '/alerts',
+    path: '/alerts',
+    getParentRoute: () => ProtectedDashboardRoute,
+  } as any)
 const ProtectedDashboardInboundsRoute =
   ProtectedDashboardInboundsRouteImport.update({
     id: '/inbounds',
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/new': typeof ProtectedNewRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
   '/dashboard/mentions': typeof ProtectedDashboardMentionsRoute
   '/dashboard/outbound': typeof ProtectedDashboardOutboundRoute
@@ -128,6 +136,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/new': typeof ProtectedNewRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
   '/dashboard/mentions': typeof ProtectedDashboardMentionsRoute
   '/dashboard/outbound': typeof ProtectedDashboardOutboundRoute
@@ -146,6 +155,7 @@ export interface FileRoutesById {
   '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/_protected/new': typeof ProtectedNewRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
+  '/_protected/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/_protected/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
   '/_protected/dashboard/mentions': typeof ProtectedDashboardMentionsRoute
   '/_protected/dashboard/outbound': typeof ProtectedDashboardOutboundRoute
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/new'
     | '/settings'
+    | '/dashboard/alerts'
     | '/dashboard/inbounds'
     | '/dashboard/mentions'
     | '/dashboard/outbound'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/new'
     | '/settings'
+    | '/dashboard/alerts'
     | '/dashboard/inbounds'
     | '/dashboard/mentions'
     | '/dashboard/outbound'
@@ -196,6 +208,7 @@ export interface FileRouteTypes {
     | '/_protected/dashboard'
     | '/_protected/new'
     | '/_protected/settings'
+    | '/_protected/dashboard/alerts'
     | '/_protected/dashboard/inbounds'
     | '/_protected/dashboard/mentions'
     | '/_protected/dashboard/outbound'
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
       parentRoute: typeof ProtectedDashboardRoute
     }
+    '/_protected/dashboard/alerts': {
+      id: '/_protected/dashboard/alerts'
+      path: '/alerts'
+      fullPath: '/dashboard/alerts'
+      preLoaderRoute: typeof ProtectedDashboardAlertsRouteImport
+      parentRoute: typeof ProtectedDashboardRoute
+    }
     '/_protected/dashboard/inbounds': {
       id: '/_protected/dashboard/inbounds'
       path: '/inbounds'
@@ -325,6 +345,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedDashboardRouteChildren {
+  ProtectedDashboardAlertsRoute: typeof ProtectedDashboardAlertsRoute
   ProtectedDashboardInboundsRoute: typeof ProtectedDashboardInboundsRoute
   ProtectedDashboardMentionsRoute: typeof ProtectedDashboardMentionsRoute
   ProtectedDashboardOutboundRoute: typeof ProtectedDashboardOutboundRoute
@@ -334,6 +355,7 @@ interface ProtectedDashboardRouteChildren {
 }
 
 const ProtectedDashboardRouteChildren: ProtectedDashboardRouteChildren = {
+  ProtectedDashboardAlertsRoute: ProtectedDashboardAlertsRoute,
   ProtectedDashboardInboundsRoute: ProtectedDashboardInboundsRoute,
   ProtectedDashboardMentionsRoute: ProtectedDashboardMentionsRoute,
   ProtectedDashboardOutboundRoute: ProtectedDashboardOutboundRoute,

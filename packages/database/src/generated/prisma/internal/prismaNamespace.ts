@@ -408,7 +408,9 @@ export const ModelName = {
   RedditThread: 'RedditThread',
   InboundCursor: 'InboundCursor',
   ContentDraft: 'ContentDraft',
-  DailyTask: 'DailyTask'
+  DailyTask: 'DailyTask',
+  FeatureInterest: 'FeatureInterest',
+  AlertPref: 'AlertPref'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -424,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "todo" | "user" | "session" | "account" | "verification" | "project" | "userApiConfig" | "projectSubreddit" | "redditThread" | "inboundCursor" | "contentDraft" | "dailyTask"
+    modelProps: "todo" | "user" | "session" | "account" | "verification" | "project" | "userApiConfig" | "projectSubreddit" | "redditThread" | "inboundCursor" | "contentDraft" | "dailyTask" | "featureInterest" | "alertPref"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1316,6 +1318,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FeatureInterest: {
+      payload: Prisma.$FeatureInterestPayload<ExtArgs>
+      fields: Prisma.FeatureInterestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FeatureInterestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FeatureInterestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        findFirst: {
+          args: Prisma.FeatureInterestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FeatureInterestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        findMany: {
+          args: Prisma.FeatureInterestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>[]
+        }
+        create: {
+          args: Prisma.FeatureInterestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        createMany: {
+          args: Prisma.FeatureInterestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FeatureInterestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>[]
+        }
+        delete: {
+          args: Prisma.FeatureInterestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        update: {
+          args: Prisma.FeatureInterestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        deleteMany: {
+          args: Prisma.FeatureInterestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FeatureInterestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FeatureInterestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>[]
+        }
+        upsert: {
+          args: Prisma.FeatureInterestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeatureInterestPayload>
+        }
+        aggregate: {
+          args: Prisma.FeatureInterestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFeatureInterest>
+        }
+        groupBy: {
+          args: Prisma.FeatureInterestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeatureInterestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FeatureInterestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeatureInterestCountAggregateOutputType> | number
+        }
+      }
+    }
+    AlertPref: {
+      payload: Prisma.$AlertPrefPayload<ExtArgs>
+      fields: Prisma.AlertPrefFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AlertPrefFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AlertPrefFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        findFirst: {
+          args: Prisma.AlertPrefFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AlertPrefFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        findMany: {
+          args: Prisma.AlertPrefFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>[]
+        }
+        create: {
+          args: Prisma.AlertPrefCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        createMany: {
+          args: Prisma.AlertPrefCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AlertPrefCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>[]
+        }
+        delete: {
+          args: Prisma.AlertPrefDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        update: {
+          args: Prisma.AlertPrefUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        deleteMany: {
+          args: Prisma.AlertPrefDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AlertPrefUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AlertPrefUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>[]
+        }
+        upsert: {
+          args: Prisma.AlertPrefUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPrefPayload>
+        }
+        aggregate: {
+          args: Prisma.AlertPrefAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAlertPref>
+        }
+        groupBy: {
+          args: Prisma.AlertPrefGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlertPrefGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AlertPrefCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlertPrefCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1539,6 +1689,32 @@ export const DailyTaskScalarFieldEnum = {
 } as const
 
 export type DailyTaskScalarFieldEnum = (typeof DailyTaskScalarFieldEnum)[keyof typeof DailyTaskScalarFieldEnum]
+
+
+export const FeatureInterestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  feature: 'feature',
+  interested: 'interested',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeatureInterestScalarFieldEnum = (typeof FeatureInterestScalarFieldEnum)[keyof typeof FeatureInterestScalarFieldEnum]
+
+
+export const AlertPrefScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  emailEnabled: 'emailEnabled',
+  notifyInbounds: 'notifyInbounds',
+  notifyOutbound: 'notifyOutbound',
+  channels: 'channels',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlertPrefScalarFieldEnum = (typeof AlertPrefScalarFieldEnum)[keyof typeof AlertPrefScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1796,6 +1972,8 @@ export type GlobalOmitConfig = {
   inboundCursor?: Prisma.InboundCursorOmit
   contentDraft?: Prisma.ContentDraftOmit
   dailyTask?: Prisma.DailyTaskOmit
+  featureInterest?: Prisma.FeatureInterestOmit
+  alertPref?: Prisma.AlertPrefOmit
 }
 
 /* Types for Logging */

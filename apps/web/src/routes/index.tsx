@@ -2,9 +2,20 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Tabs, Tab } from '@heroui/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { RiGithubLine, RiInboxLine, RiVoiceprintLine, RiSendPlaneLine, RiCheckLine } from 'react-icons/ri'
-import { SiOpenai, SiClaude, SiPerplexity } from 'react-icons/si'
-import { FaReddit } from 'react-icons/fa6'
+import {
+  RiGithubLine,
+  RiInboxLine,
+  RiVoiceprintLine,
+  RiSendPlaneLine,
+  RiCheckLine,
+  RiRedditLine,
+  RiBellLine,
+  RiNotification3Line,
+  RiSettingsLine,
+  RiMailLine,
+} from 'react-icons/ri'
+import { SiOpenai, SiClaude, SiPerplexity, SiSlack, SiDiscord } from 'react-icons/si'
+import { FaReddit, FaWhatsapp } from 'react-icons/fa6'
 import { Brand } from '#/components/Brand'
 import { PricingSection } from '#/components/pricing/PricingSection'
 import { ThreadCard } from '#/components/dashboard/atoms/ThreadCard'
@@ -38,7 +49,7 @@ const TITLE_GRADIENT: CSSProperties = {
   animation: 'shimmer 6s linear infinite',
 }
 
-type DemoTab = 'inbounds' | 'outbound' | 'subreddits' | 'mentions' | 'settings'
+type DemoTab = 'inbounds' | 'outbound' | 'subreddits' | 'mentions' | 'alerts' | 'settings'
 
 function DemoDashboard({
   tab,
@@ -55,6 +66,11 @@ function DemoDashboard({
   const [demoAudience, setDemoAudience] = useState(DEMO_DASHBOARD_DATA.targetAudience)
   const [demoKeywords, setDemoKeywords] = useState(DEMO_DASHBOARD_DATA.keywords.join(', '))
   const [demoSaved, setDemoSaved] = useState(false)
+  const [demoNotifyInbounds, setDemoNotifyInbounds] = useState(true)
+  const [demoNotifyOutbound, setDemoNotifyOutbound] = useState(true)
+  const [demoChannels, setDemoChannels] = useState<string[]>(['Email'])
+  const [demoCustomChannel, setDemoCustomChannel] = useState('')
+  const [demoAlertsSaved, setDemoAlertsSaved] = useState(false)
 
   // Per-channel counts computed from the static snapshot - no fetching
   const counts = useMemo(() => {
@@ -78,29 +94,31 @@ function DemoDashboard({
       )
   }, [activeTab, selectedChannel])
 
-  const tabs: { key: DemoTab; label: string }[] = [
-    { key: 'inbounds', label: 'Inbounds' },
-    { key: 'outbound', label: 'Outbound' },
-    { key: 'subreddits', label: 'Subreddits' },
-    { key: 'mentions', label: 'Mentions' },
-    { key: 'settings', label: 'Settings' },
+  const tabs: { key: DemoTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { key: 'inbounds', label: 'Inbounds', icon: RiInboxLine },
+    { key: 'outbound', label: 'Outbound', icon: RiSendPlaneLine },
+    { key: 'subreddits', label: 'Subreddits', icon: RiRedditLine },
+    { key: 'mentions', label: 'Mentions', icon: RiBellLine },
+    { key: 'alerts', label: 'Alerts', icon: RiNotification3Line },
+    { key: 'settings', label: 'Settings', icon: RiSettingsLine },
   ]
 
   return (
     <div className="min-h-[520px]">
-      {/* Demo tab bar (Settings excluded) */}
+      {/* Demo tab bar */}
       <div className="flex items-center gap-1 border-b border-[#F0DDD7] px-5">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => onTabChange(t.key)}
             className={[
-              '-mb-px border-b-2 px-4 py-3 text-[13px] font-semibold transition-colors',
+              '-mb-px flex cursor-pointer items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] font-semibold transition-colors',
               tab === t.key
                 ? 'border-[#FF6F59] text-[#332A28]'
                 : 'border-transparent text-[#AA9690] hover:text-[#332A28]',
             ].join(' ')}
           >
+            <t.icon className="text-sm" />
             {t.label}
           </button>
         ))}
@@ -310,6 +328,161 @@ function DemoDashboard({
             </div>
           </div>
         )}
+
+        {tab === 'alerts' && (
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Alerts</h1>
+              <p className="mt-1 text-sm text-muted">
+                Get notified as soon as someone shares a problem your product solves.
+              </p>
+            </div>
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-line bg-card p-6">
+                <h2 className="font-semibold text-ink">Notifications</h2>
+                <p className="mt-1 text-xs text-muted">
+                  Choose what you want to be notified about, and which channels to use.
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-line bg-sand/60 p-4">
+                    <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink">
+                      <input
+                        type="checkbox"
+                        checked={demoNotifyInbounds}
+                        onChange={(e) => setDemoNotifyInbounds(e.target.checked)}
+                        className="h-4 w-4 rounded accent-[#FF6F59]"
+                      />
+                      Inbound leads
+                    </label>
+                    <p className="mt-1 text-xs text-muted">High buying-intent threads found for your products.</p>
+                  </div>
+                  <div className="rounded-xl border border-line bg-sand/60 p-4">
+                    <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink">
+                      <input
+                        type="checkbox"
+                        checked={demoNotifyOutbound}
+                        onChange={(e) => setDemoNotifyOutbound(e.target.checked)}
+                        className="h-4 w-4 rounded accent-[#FF6F59]"
+                      />
+                      Outbound drafts
+                    </label>
+                    <p className="mt-1 text-xs text-muted">When your daily content batch is ready to review and post.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-line bg-card p-6">
+                <div className="flex items-center gap-2">
+                  <RiNotification3Line className="text-lg text-coral" />
+                  <div>
+                    <h2 className="font-semibold text-ink">Request more channels</h2>
+                    <p className="mt-1 text-xs text-muted">
+                      Want alerts somewhere besides email? Tell us which channels to add.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {[
+                    { key: 'Email', icon: RiMailLine },
+                    { key: 'WhatsApp', icon: FaWhatsapp },
+                    { key: 'Slack', icon: SiSlack },
+                    { key: 'Discord', icon: SiDiscord },
+                  ].map((channel) => {
+                    const active = demoChannels.includes(channel.key)
+                    return (
+                      <button
+                        key={channel.key}
+                        type="button"
+                        onClick={() =>
+                          setDemoChannels((prev) =>
+                            prev.includes(channel.key) ? prev.filter((c) => c !== channel.key) : [...prev, channel.key],
+                          )
+                        }
+                        className={[
+                          'flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
+                          active
+                            ? 'border-transparent bg-[#FF6F59] text-white'
+                            : 'border-[#E9D4CD] bg-white text-[#756661] hover:border-[#E0C4BC]',
+                        ].join(' ')}
+                      >
+                        <channel.icon className="text-sm" /> {channel.key}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <input
+                    value={demoCustomChannel}
+                    onChange={(e) => setDemoCustomChannel(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        const name = demoCustomChannel.trim()
+                        if (name && !demoChannels.includes(name)) setDemoChannels((prev) => [...prev, name])
+                        setDemoCustomChannel('')
+                      }
+                    }}
+                    placeholder="Or type a custom channel (e.g. Telegram, SMS)"
+                    className="control-outline w-full max-w-md rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-coral"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const name = demoCustomChannel.trim()
+                      if (name && !demoChannels.includes(name)) setDemoChannels((prev) => [...prev, name])
+                      setDemoCustomChannel('')
+                    }}
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-coral/10 text-coral transition hover:bg-coral/20"
+                    aria-label="Add custom channel"
+                  >
+                    <RiSendPlaneLine className="text-base" />
+                  </button>
+                </div>
+
+                {demoChannels.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {demoChannels.map((channel) => (
+                      <span
+                        key={channel}
+                        className="flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-1 text-xs font-medium text-coral-dark"
+                      >
+                        {channel}
+                        <button
+                          type="button"
+                          onClick={() => setDemoChannels((prev) => prev.filter((c) => c !== channel))}
+                          className="cursor-pointer text-coral-dark/70 hover:text-coral-dark"
+                          aria-label={`Remove ${channel}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {demoAlertsSaved && (
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-600">
+                  <RiCheckLine className="text-base" /> Alert preferences saved (preview)
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDemoAlertsSaved(true)
+                    setTimeout(() => setDemoAlertsSaved(false), 3000)
+                  }}
+                  className="cursor-pointer rounded-full bg-coral px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+                >
+                  Save Alert Preferences
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -398,9 +571,6 @@ function Home() {
             <Link to="/dashboard" className="hidden text-sm font-semibold text-[#332A28] no-underline sm:block">
               Dashboard
             </Link>
-            <Link to="/login" className="hidden text-sm font-semibold text-[#332A28] no-underline sm:block">
-              Sign in
-            </Link>
             <Link
               to="/login"
               className="flex h-10 items-center gap-[10px] rounded-full bg-[#302A29] px-5 text-[13px] font-semibold text-white no-underline transition-transform duration-150 hover:-translate-y-px"
@@ -437,9 +607,6 @@ function Home() {
                 className="text-sm font-medium text-[#796B66] hover:text-[#332A28] no-underline"
               >
                 Dashboard
-              </Link>
-              <Link to="/login" className="text-sm font-medium text-[#796B66] hover:text-[#332A28] no-underline">
-                Sign in
               </Link>
             </nav>
           </div>

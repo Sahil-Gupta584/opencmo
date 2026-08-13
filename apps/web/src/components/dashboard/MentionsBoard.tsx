@@ -1,12 +1,14 @@
-import { Chip, Spinner } from '@heroui/react'
-import { useQuery } from '@tanstack/react-query'
+import { Button, Chip, Spinner } from '@heroui/react'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
+import { useState } from 'react'
 import {
   RiVoiceprintLine,
   RiBugLine,
   RiLightbulbLine,
   RiHeartLine,
   RiSearchEyeLine,
+  RiCheckLine,
 } from 'react-icons/ri'
 
 interface MentionsBoardProps {
@@ -25,8 +27,28 @@ export function MentionsBoard({ activeProjectId }: MentionsBoardProps) {
     staleTime: 0,
   })
 
+  const { data: interest } = useQuery({
+    ...orpc.getMentionsInterest.queryOptions({ input: { feature: 'mentions' } }),
+    staleTime: 0,
+  })
+
+  const saveInterestMutation = useMutation(
+    orpc.saveMentionsInterest.mutationOptions({
+      onError: (err) => {
+        console.error('🔴 Failed to save mentions interest:', err)
+      },
+    }),
+  )
+
   const projectName =
     projects.find((p) => p.id === activeProjectId)?.name || projects[0]?.name || 'your brand'
+
+  const interested = interest?.interested
+  const answered = interested === true || interested === false
+
+  const handleAnswer = (answer: boolean) => {
+    saveInterestMutation.mutate({ feature: 'mentions', interested: answer })
+  }
 
   if (isLoading) {
     return (
@@ -67,6 +89,38 @@ export function MentionsBoard({ activeProjectId }: MentionsBoardProps) {
             is discussing a bug, asking for a feature, or singing your praises - you'll see it here,
             auto-tagged into categories.
           </p>
+
+          {answered ? (
+            <div className="mt-5 flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
+              <RiCheckLine className="text-base" />
+              {interested ? "You're on the interest list - we'll notify you when Mentions launches." : 'Got it - thanks for the feedback!'}
+            </div>
+          ) : (
+            <div className="mt-5 flex flex-col items-center gap-2">
+              <p className="text-sm font-semibold text-ink">Interested in this feature?</p>
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  color="primary"
+                  variant="solid"
+                  isLoading={saveInterestMutation.isPending}
+                  onPress={() => handleAnswer(true)}
+                  className="bg-coral font-semibold"
+                >
+                  Yes, I'm interested
+                </Button>
+                <Button
+                  size="sm"
+                  variant="bordered"
+                  isLoading={saveInterestMutation.isPending}
+                  onPress={() => handleAnswer(false)}
+                  className="font-medium"
+                >
+                  Not interested
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

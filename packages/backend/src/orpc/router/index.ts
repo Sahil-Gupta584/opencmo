@@ -3,6 +3,7 @@ import { getApiConfig, saveApiConfig } from './api-config'
 import { listProjects, createProject, analyzeProduct, updateProject, refreshSubreddits, addSubreddit, removeSubreddit } from './projects'
 import { fetchInbounds, listThreads, listThreadCounts, updateThreadStatus, generateThreadReply } from './inbounds'
 import { getNotificationPref, saveNotificationPref } from './notifications'
+import { getMentionsInterest, saveMentionsInterest, getAlertPref, saveAlertPref } from './prefs'
 import { createCheckout, getSubscription } from './billing'
 import { runFetchCycle, runDailyContentCycle } from './cron'
 import { listProjects as demoListProjects } from './demo'
@@ -26,6 +27,10 @@ export default {
   generateThreadReply,
   getNotificationPref,
   saveNotificationPref,
+  getMentionsInterest,
+  saveMentionsInterest,
+  getAlertPref,
+  saveAlertPref,
   createCheckout,
   getSubscription,
   runFetchCycle,

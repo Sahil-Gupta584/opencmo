@@ -27,6 +27,7 @@ import {
   RiFlashlightLine,
   RiLogoutBoxLine,
   RiDashboardLine,
+  RiNotification3Line,
 } from 'react-icons/ri'
 import { useState, useMemo, useEffect } from 'react'
 
@@ -118,6 +119,7 @@ function DashboardLayout() {
     { label: 'Outbound', to: '/dashboard/outbound', icon: RiSendPlaneLine },
     { label: 'Subreddits', to: '/dashboard/subreddits', icon: RiRedditLine },
     { label: 'Mentions', to: '/dashboard/mentions', icon: RiBellLine },
+    { label: 'Alerts', to: '/dashboard/alerts', icon: RiNotification3Line },
     { label: 'Settings', to: '/dashboard/settings', icon: RiSettingsLine },
   ] as const
 

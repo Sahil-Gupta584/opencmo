@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/lib/auth.ts",
+    "src/routes/api/webhook/dodo.ts",
+    "src/routes/_protected/dashboard.subreddits.tsx",
+    "src/routes/index.tsx",
+    "src/routeTree.gen.ts"
+  ],
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  }
+}

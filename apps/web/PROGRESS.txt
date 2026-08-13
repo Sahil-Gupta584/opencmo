@@ -1,0 +1,29 @@
+# OpenCMO Reddit Growth & Marketing Platform - Progress Tracker
+
+**Strategy & Execution Model**: 
+> [!IMPORTANT]
+> **No Direct Reddit API Posting**: Due to strict Reddit API rate limits, OAuth complexity, and shadowban risks, the platform strictly focuses on **AI Research, Subreddit Discovery, Opportunity Radar, and Ban-Safe Content Generation**. Users manually copy and post content to Reddit directly.
+
+---
+
+## Feature Matrix & Implementation Status
+
+| Feature Area | Ideal Planned Requirement | Current Codebase Implementation | Status |
+| :--- | :--- | :--- | :---: |
+| **Auth & BYO-AI Setup** | Secure Auth + AES-256 encrypted API key storage (OpenAI/Anthropic/Gemini) | Better-Auth + `UserApiConfig` with AES-256 encryption (`src/lib/crypto.ts`) | ✅ |
+| **Website Scraper** | Scrape user product URL for metadata, keywords & target audience | `scrapeWebsite` parses title, description, and body text (`src/lib/scraper.ts`) | ✅ |
+| **Subreddit Discovery & Audit** | Discover relevant subreddits with subscriber counts and rules | AI extracts subreddits + RSS details fetcher (`src/lib/reddit.ts`) | ✅ |
+| **Buying-Intent Radar** | Search threads with lead intent indicators | RSS Atom search for keyword opportunities (`src/lib/reddit.ts`) | ✅ |
+| **Ban-Safe AI Content Drafter** | Generate subreddit-tailored post drafts with spam risk score | AI drafting with link density risk scoring (`src/orpc/router/projects.ts`) | ✅ |
+| **Dynamic Daily Roadmap** | Custom multi-day engagement action plan per SaaS niche | Currently uses basic static template task items | ⏳ *In Progress* |
+| **Intent Scoring Algorithm** | Real AI-evaluated intent rating per thread | Currently uses placeholder heuristic randomizer | ⏳ *In Progress* |
+| **No-API Direct Posting** | Manual user copy/paste execution (No auto-posting / No API write risk) | Intentionally designed for manual posting by user | ✅ |
+
+---
+
+## Detailed Status Notes
+
+1. **Auth & Infrastructure**: ✅ Complete. Google OAuth + Magic Link + Protected routes.
+2. **BYO API Key Encryption**: ✅ Complete. Supports OpenAI, Gemini, and Anthropic.
+3. **No-API Posting Architecture**: ✅ Confirmed. We rely on intelligent web search/RSS for discovery + LLM for content creation, leaving posting to the user to guarantee account safety.
+4. **Dynamic LLM Roadmap & Intent Scoring**: ⏳ Next phase focus. Replacing static roadmap items and random intent numbers with LLM analysis.

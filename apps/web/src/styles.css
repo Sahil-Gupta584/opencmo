@@ -1,0 +1,125 @@
+
+@import "tailwindcss";
+@plugin '../hero.ts';
+@source '../../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+@theme {
+  --color-surface: #fffaf7;
+  --color-card: #fffcfc;
+  --color-ink: #332a28;
+  --color-muted: #796b66;
+  --color-faint: #aa9690;
+  --color-line: #f2e8e3;
+  --color-line-strong: #e9d4cd;
+  --color-coral: #ff6f59;
+  --color-coral-dark: #f55d47;
+  --color-sand: #f5efec;
+
+  --shadow-soft: 0 1px 2px rgb(51 42 40 / 0.04), 0 4px 10px -2px rgb(51 42 40 / 0.05), 0 12px 24px -6px rgb(51 42 40 / 0.06);
+  --shadow-lift: 0 2px 5px rgb(51 42 40 / 0.05), 0 10px 20px -4px rgb(51 42 40 / 0.08), 0 28px 56px -12px rgb(51 42 40 / 0.12);
+  --shadow-glow: 0 0 0 1px rgb(255 111 89 / 0.16), 0 8px 24px -6px rgb(255 111 89 / 0.28);
+}
+
+@font-face {
+  font-family: 'Recoleta';
+  src: url('/fonts/Recoleta-RegularDEMO.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium surface: hairline light outline + top inner highlight + layered soft shadow */
+@layer components {
+  .card-surface {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 252, 252, 0.6));
+    border: 1px solid rgba(51, 42, 40, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 1px 2px rgb(51 42 40 / 0.04),
+      0 4px 10px -2px rgb(51 42 40 / 0.05),
+      0 12px 24px -6px rgb(51 42 40 / 0.06);
+    border-radius: 1rem;
+  }
+
+  .card-surface-hover {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .card-surface-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(51, 42, 40, 0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 2px 5px rgb(51 42 40 / 0.05),
+      0 10px 20px -4px rgb(51 42 40 / 0.08),
+      0 28px 56px -12px rgb(51 42 40 / 0.12);
+  }
+
+  /* Hairline light outline for inputs & controls */
+  .control-outline {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 0 0 1px rgba(51, 42, 40, 0.06);
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .control-outline:focus-within {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 0 0 1px rgba(255, 111, 89, 0.4),
+      0 4px 12px -4px rgba(255, 111, 89, 0.25);
+  }
+}
+
+/* Cute nav link hover: coral text + springy sliding underline */
+.nav-link {
+  position: relative;
+  transition: color 0.25s ease;
+}
+.nav-link:hover {
+  color: #ff6f59;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+

@@ -3,9 +3,11 @@ zerops:
     build:
       base: nodejs@22
       os: ubuntu
+      envVariables:
+        DATABASE_URL: ${DATABASE_URL}
       buildCommands:
         - npm install
-        - npm run db:generate --workspace=database
+        - npm run db:generate
         - npm run build --workspace=api
       deployFiles:
         - apps/api/dist
@@ -22,11 +24,11 @@ zerops:
       ports:
         - port: 5001
           httpSupport: true
-      start: npm start
+      start: npm run start --workspace=api
       healthCheck:
         httpGet:
           port: 5001
-          path: /status
+          path: /health
       envVariables:
         NODE_ENV: production
         PORT: "5001"

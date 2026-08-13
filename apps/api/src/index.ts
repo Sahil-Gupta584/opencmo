@@ -4,7 +4,10 @@ import { createServer } from "./server";
 
 config({ path: path.join(process.cwd(), "../../.env") });
 
-const port = process.env.PORT || 5001;
+// Top-level await ensures dotenv is loaded before env validation runs
+await import("@repo/backend");
+
+const port = process.env.API_PORT || process.env.PORT || 5001;
 const server = createServer();
 
 server.listen(port, () => {

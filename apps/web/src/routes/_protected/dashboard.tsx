@@ -346,16 +346,9 @@ function DashboardLayout() {
 
                 <DropdownSection showDivider>
                   <DropdownItem
-                    key="all-products"
-                    startContent={<RiDashboardLine className="text-base text-muted" />}
-                    onPress={() => void navigate({ to: '/dashboard' })}
-                  >
-                    All Products
-                  </DropdownItem>
-                  <DropdownItem
                     key="settings"
                     startContent={<RiSettingsLine className="text-base text-muted" />}
-                    onPress={() => void navigate({ to: '/dashboard/settings' })}
+                    onPress={() => void navigate({ to: '/settings' })}
                   >
                     Settings
                   </DropdownItem>

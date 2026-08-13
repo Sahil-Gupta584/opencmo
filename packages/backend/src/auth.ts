@@ -7,7 +7,7 @@ import { env } from './env.js'
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: [env.WEB_URL],
+  trustedOrigins: [env.BETTER_AUTH_URL],
   advanced: {
     crossSubDomainCookies: {
       enabled: true,

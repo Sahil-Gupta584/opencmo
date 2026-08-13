@@ -6,7 +6,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     BETTER_AUTH_URL: z.string().url(),
     BETTER_AUTH_SECRET: z.string().min(1),
-    WEB_URL: z.string().url(),
+    BETTER_AUTH_URL: z.string().url(),
     RESEND_API_KEY: z.string().min(1).optional(),
     CRON_SECRET: z.string().min(1).optional(),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
@@ -26,4 +26,8 @@ export const env = createEnv({
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
+  onValidationError: (issues) => {
+    console.error('❌ Missing or invalid required environment variables in @repo/backend:\n', JSON.stringify(issues, null, 2))
+    throw new Error(`Initialization failed: Missing or invalid environment variables in @repo/backend`)
+  },
 })

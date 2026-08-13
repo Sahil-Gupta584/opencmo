@@ -103,9 +103,10 @@ async function fetchWithRetry(options: {
       throw new Error(`${label} API error (HTTP ${res.status}): ${text}`)
     }
 
-    const delay =
-      parseRetryDelayMs(res, text) ??
-      Math.min(BASE_RETRY_MS * 2 ** attempt, 30000) + Math.floor(Math.random() * 250)
+    let delay = parseRetryDelayMs(res, text)
+    if (delay === undefined || delay < 1000) {
+      delay = Math.min(BASE_RETRY_MS * 2 ** attempt, 30000) + Math.floor(Math.random() * 250)
+    }
     console.log(
       `⚠️ ${label} rate-limited (HTTP ${res.status}), retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`,
     )

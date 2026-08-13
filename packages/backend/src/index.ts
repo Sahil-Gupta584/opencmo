@@ -5,7 +5,9 @@ import { onError } from '@orpc/server'
 import { RPCHandler } from '@orpc/server/fetch'
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import router from './orpc/router/index.js'
+import { env } from './env.js'
 
+export { env }
 export { default as router } from './orpc/router/index.js'
 export { dodo } from './dodo.js'
 

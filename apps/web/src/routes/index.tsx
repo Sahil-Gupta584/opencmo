@@ -509,14 +509,22 @@ function Home() {
     const duration = 2400
     let logosFrac = 0.45
     let redditFrac = 0.9
+    let logosTriggered = false
+    let redditTriggered = false
 
     const tick = (now: number) => {
       if (!startTime) startTime = now
       const t = Math.min(1, (now - startTime) / duration)
       const p = 1 - Math.pow(1 - t, 2)
       title.style.setProperty('--sweep', `${(p * 100).toFixed(2)}%`)
-      if (p >= logosFrac) setLogosDropped(true)
-      if (p >= redditFrac) setRedditDropped(true)
+      if (p >= logosFrac && !logosTriggered) {
+        logosTriggered = true
+        setLogosDropped(true)
+      }
+      if (p >= redditFrac && !redditTriggered) {
+        redditTriggered = true
+        setRedditDropped(true)
+      }
       if (t < 1) raf = requestAnimationFrame(tick)
     }
 
@@ -678,7 +686,7 @@ function Home() {
                     className="-ml-[0.28em] first:ml-0 flex h-[1.05em] w-[1.05em] items-center justify-center rounded-full border border-[#F0E0DA] bg-white shadow-sm transition-transform duration-300 hover:scale-110"
                     style={
                       logosDropped
-                        ? { animation: `logo-drop 0.7s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.08}s both` }
+                        ? { animation: `logo-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.08}s both` }
                         : { opacity: 0 }
                     }
                   >
@@ -698,7 +706,7 @@ function Home() {
                 className="flex h-[0.9em] w-[0.9em] shrink-0 items-center justify-center rounded-full bg-[#FF4500] shadow-sm transition-transform duration-300 hover:scale-110"
                 style={
                   redditDropped
-                    ? { animation: 'logo-drop 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.05s both' }
+                    ? { animation: 'logo-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.05s both' }
                     : { opacity: 0 }
                 }
               >
@@ -714,10 +722,7 @@ function Home() {
               className="pointer-events-none absolute inset-0 flex flex-col items-center"
               style={{
                 ...TITLE_GRADIENT,
-                maskImage:
-                  'linear-gradient(to right, black 0%, black var(--sweep, 0%), transparent var(--sweep, 0%), transparent 100%)',
-                WebkitMaskImage:
-                  'linear-gradient(to right, black 0%, black var(--sweep, 0%), transparent var(--sweep, 0%), transparent 100%)',
+                clipPath: 'inset(0 calc(100% - var(--sweep, 0%)) 0 0)',
               }}
             >
               <span className="flex items-center gap-[0.35em]">
@@ -869,11 +874,11 @@ function Home() {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes logo-drop {
-          0% { opacity: 0; transform: translateY(-90px) scale(0.7); }
-          60% { opacity: 1; transform: translateY(10px) scale(1.05); }
-          80% { transform: translateY(-4px) scale(0.99); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes logo-pop {
+          0% { opacity: 0; transform: scale(0.6); }
+          50% { opacity: 1; transform: scaleX(1.15) scaleY(0.85); }
+          75% { transform: scaleX(0.95) scaleY(1.05); }
+          100% { opacity: 1; transform: scale(1); }
         }
         @keyframes logo-float {
           0%, 100% { transform: translateY(0) rotate(0deg); }

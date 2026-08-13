@@ -7,8 +7,10 @@ import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [tailwindcss(), tanstackStart(),nitro(), viteReact()],
+  plugins: [tailwindcss(), tanstackStart(), nitro(), viteReact()],
   server: {
+    port: 3000,
+    strictPort: true,
     allowedHosts: ['fbf3-152-58-1-123.ngrok-free.app'],
     proxy: {
       // Dodo webhooks live on the API (5001); web is the public entry point.

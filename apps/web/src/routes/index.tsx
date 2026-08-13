@@ -565,7 +565,7 @@ function Home() {
               </Link>
             ))}
             <a
-              href="https://github.com"
+              href="https://github.com/Sahil-gupta584/opencmo"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-link flex items-center gap-[7px] text-sm font-medium text-[#796B66] no-underline"

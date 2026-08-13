@@ -14,13 +14,6 @@ export function PricingSection() {
       </div>
 
       <PricingCards />
-
-      <p className="mt-8 text-center text-xs text-faint">
-        Self-host for free ·{' '}
-        <a href="https://github.com" className="underline hover:text-ink">
-          View on GitHub
-        </a>
-      </p>
     </div>
   )
 }

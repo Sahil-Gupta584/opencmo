@@ -27,15 +27,6 @@ zerops:
         httpGet:
           port: 5001
           path: /status
-      crontab:
-        - command: node dist/cron/fetch-inbounds.cjs
-          timing: "0 */4 * * *"
-          allContainers: false
-          workingDir: /var/www/apps/api
-        - command: node dist/cron/generate-daily-content.cjs
-          timing: "0 7 * * *"
-          allContainers: false
-          workingDir: /var/www/apps/api
       envVariables:
         NODE_ENV: production
         PORT: "5001"

@@ -1,6 +1,7 @@
 import { os } from '@orpc/server'
 import { ORPCError } from '@orpc/client'
 import { auth } from '../auth.js'
+import { prisma } from '@repo/database'
 
 export interface ORPCContext {
   headers: Headers | Record<string, string>
@@ -107,6 +108,15 @@ export const authed = base.use(async ({ context, next }) => {
 		})
 	} catch (error) {
 		console.error("getSession threw error:", error)
+				
+		// Let's test if the DB is actually reachable!
+		try {
+			await prisma.user.findFirst();
+			console.log("✅ Database connection is WORKING");
+		} catch (dbError) {
+			console.error("❌ DATABASE ERROR! Prisma failed to connect. Your DATABASE_URL in Zerops might be wrong or unreachable:", dbError);
+		}
+
 		throw error
 	}
 })

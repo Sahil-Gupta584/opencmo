@@ -5,7 +5,6 @@ import {
 } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { env } from '#/env'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -13,7 +12,7 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
-const siteUrl = env.VITE_BETTER_AUTH_URL || 'http://localhost:3000'
+const siteUrl = 'http://localhost:3000'
 const ogImageUrl = `${siteUrl}/og.png`
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

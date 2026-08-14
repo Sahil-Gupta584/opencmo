@@ -11,9 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedRouteImport } from './routes/_protected'
-import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as ProtectedCheckoutRouteImport } from './routes/_protected/checkout'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedNewRouteImport } from './routes/_protected/new'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
@@ -35,11 +35,6 @@ const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -49,6 +44,11 @@ const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedCheckoutRoute = ProtectedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   id: '/dashboard',
@@ -114,9 +114,9 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/checkout': typeof ProtectedCheckoutRoute
   '/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/new': typeof ProtectedNewRoute
   '/settings': typeof ProtectedSettingsRoute
@@ -131,9 +131,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/checkout': typeof ProtectedCheckoutRoute
   '/new': typeof ProtectedNewRoute
   '/settings': typeof ProtectedSettingsRoute
   '/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
@@ -149,9 +149,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
-  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/_protected/checkout': typeof ProtectedCheckoutRoute
   '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/_protected/new': typeof ProtectedNewRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
@@ -168,9 +168,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/checkout'
     | '/login'
     | '/pricing'
+    | '/checkout'
     | '/dashboard'
     | '/new'
     | '/settings'
@@ -185,9 +185,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/checkout'
     | '/login'
     | '/pricing'
+    | '/checkout'
     | '/new'
     | '/settings'
     | '/dashboard/alerts'
@@ -202,9 +202,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
-    | '/checkout'
     | '/login'
     | '/pricing'
+    | '/_protected/checkout'
     | '/_protected/dashboard'
     | '/_protected/new'
     | '/_protected/settings'
@@ -221,7 +221,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
-  CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -243,13 +242,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -263,6 +255,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_protected/checkout': {
+      id: '/_protected/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof ProtectedCheckoutRouteImport
+      parentRoute: typeof ProtectedRoute
     }
     '/_protected/dashboard': {
       id: '/_protected/dashboard'
@@ -368,12 +367,14 @@ const ProtectedDashboardRouteWithChildren =
   ProtectedDashboardRoute._addFileChildren(ProtectedDashboardRouteChildren)
 
 interface ProtectedRouteChildren {
+  ProtectedCheckoutRoute: typeof ProtectedCheckoutRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren
   ProtectedNewRoute: typeof ProtectedNewRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedCheckoutRoute: ProtectedCheckoutRoute,
   ProtectedDashboardRoute: ProtectedDashboardRouteWithChildren,
   ProtectedNewRoute: ProtectedNewRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
@@ -386,7 +387,6 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
-  CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

@@ -67,7 +67,7 @@ export function PricingCards() {
     setErrorMsg(null)
     const { data: session } = await authClient.getSession()
     if (!session?.user) {
-      void navigate({ to: '/login', search: { redirect: `/checkout?plan=${plan}` } })
+      navigate({ to: '/login', search: { redirect: `/checkout?plan=${plan}` } })
       return
     }
     checkout.mutate({ plan })

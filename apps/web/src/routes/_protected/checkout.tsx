@@ -16,7 +16,7 @@ import { getSession } from '#/lib/session'
  * This page exists so the login flow can use it as callbackURL:
  *   /login?redirect=/checkout?plan=INDIE
  */
-export const Route = createFileRoute('/checkout')({
+export const Route = createFileRoute('/_protected/checkout')({
   validateSearch: (search: Record<string, unknown>) => ({
     plan: search.plan === 'PRO' ? ('PRO' as const) : ('INDIE' as const),
   }),

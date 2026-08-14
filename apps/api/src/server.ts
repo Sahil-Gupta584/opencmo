@@ -84,7 +84,18 @@ export const createServer = (): Express => {
   const app = express();
   app
     .disable("x-powered-by")
-    .use(morgan("dev"))
+    .use((req, res, next) => {
+      const ip =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        "-";
+      console.log(`→ ${req.method} ${req.originalUrl} ip=${ip} ua=${req.headers["user-agent"] || "-"} ct=${req.headers["content-type"] || "-"}`);
+      const start = Date.now();
+      res.on("finish", () => {
+        console.log(`← ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms`);
+      });
+      next();
+    })
     .use(
       "/api/webhook/dodo",
       bodyParser.text({ type: () => true }),

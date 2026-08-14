@@ -10,6 +10,7 @@ export const env = createEnv({
     FIRECRAWL_API_KEY: z.string().min(1).optional(),
     SENTRY_AUTH_TOKEN: z.string().min(1).optional(),
     NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
+    BETTER_AUTH_URL: z.string().url(),
   },
 
   clientPrefix: 'VITE_',

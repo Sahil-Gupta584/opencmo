@@ -5,10 +5,15 @@ import { magicLink } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { prisma } from "@repo/database";
 import { env } from "#/env";
+console.log({
+  a:env.VITE_BETTER_AUTH_URL,
+  b:env.BETTER_AUTH_URL,
+
+});
 
 export const auth = betterAuth({
-  baseURL: env.VITE_BETTER_AUTH_URL,
-  secret: env.BETTER_AUTH_SECRET || 'd3v-s3cr3t-k3y-32-byt3s-long-secret!',
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -32,7 +37,7 @@ export const auth = betterAuth({
       sendMagicLink: async ({ email, url }) => {
         const resend = new Resend(env.RESEND_API_KEY)
         const { error } = await resend.emails.send({
-          from: 'noreply@chatcash.live',
+          from: 'noreply@opemcmo.site',
           to: email,
           subject: 'Your magic link',
           html: `<p>Click the link below to sign in:</p><a href="${url}">${url}</a>`,

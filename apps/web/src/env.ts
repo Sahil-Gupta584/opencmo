@@ -28,7 +28,7 @@ export const env = createEnv({
     VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
     VITE_SENTRY_ORG: import.meta.env.VITE_SENTRY_ORG,
     VITE_SENTRY_PROJECT: import.meta.env.VITE_SENTRY_PROJECT,
-    VITE_API_URL: import.meta.env.VITE_API_URL,
+    VITE_API_URL: import.meta.env.VITE_API_URL || process.env.VITE_API_URL,
     VITE_BETTER_AUTH_URL: import.meta.env.VITE_BETTER_AUTH_URL || process.env.VITE_BETTER_AUTH_URL,
     
     // Server variables (only needed in SSR / API routes)

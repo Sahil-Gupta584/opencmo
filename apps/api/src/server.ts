@@ -85,6 +85,7 @@ export const createServer = (): Express => {
   app
     .disable("x-powered-by")
     .use((req, res, next) => {
+      if (req.path === "/health") return next();
       const ip =
         (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
         req.socket.remoteAddress ||

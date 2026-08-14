@@ -23,8 +23,20 @@ export const env = createEnv({
   },
   
   runtimeEnv: {
-    ...import.meta.env,
-    ...process.env,
+    VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+    VITE_SENTRY_ORG: import.meta.env.VITE_SENTRY_ORG,
+    VITE_SENTRY_PROJECT: import.meta.env.VITE_SENTRY_PROJECT,
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    VITE_BETTER_AUTH_URL: import.meta.env.VITE_BETTER_AUTH_URL,
+    
+    // Server envs
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    FIRECRAWL_API_KEY: process.env.FIRECRAWL_API_KEY,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    NODE_ENV: process.env.NODE_ENV,
   },
 
   emptyStringAsUndefined: true,

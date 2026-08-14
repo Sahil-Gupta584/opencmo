@@ -4,7 +4,7 @@ import { Brand } from '#/components/Brand'
 import { PricingSection } from '#/components/pricing/PricingSection'
 import { RiGithubLine, RiRedditLine, RiQuestionLine } from 'react-icons/ri'
 
-export const Route = createFileRoute('/pricing')({ component: PricingPage })
+export const Route = createFileRoute('/_protected/pricing')({ component: PricingPage })
 
 const FAQS = [
   {

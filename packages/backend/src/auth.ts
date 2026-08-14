@@ -8,10 +8,11 @@ import { Resend } from 'resend'
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: [env.BETTER_AUTH_URL],
+  trustedOrigins: [env.BETTER_AUTH_URL, "https://www.opencmo.site", "https://api.opencmo.site"],
   advanced: {
     crossSubDomainCookies: {
       enabled: true,
+      domain:"opencmo.site"
     },
   },
   logger: {

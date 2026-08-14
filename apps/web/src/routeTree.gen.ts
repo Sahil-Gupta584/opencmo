@@ -12,10 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProtectedCheckoutRouteImport } from './routes/_protected/checkout'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedNewRouteImport } from './routes/_protected/new'
+import { Route as ProtectedPricingRouteImport } from './routes/_protected/pricing'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard.index'
 import { Route as ProtectedDashboardAlertsRouteImport } from './routes/_protected/dashboard.alerts'
@@ -40,11 +40,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProtectedCheckoutRoute = ProtectedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -58,6 +53,11 @@ const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
 const ProtectedNewRoute = ProtectedNewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedPricingRoute = ProtectedPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
@@ -115,10 +115,10 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
   '/checkout': typeof ProtectedCheckoutRoute
   '/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/new': typeof ProtectedNewRoute
+  '/pricing': typeof ProtectedPricingRoute
   '/settings': typeof ProtectedSettingsRoute
   '/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
@@ -132,9 +132,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
   '/checkout': typeof ProtectedCheckoutRoute
   '/new': typeof ProtectedNewRoute
+  '/pricing': typeof ProtectedPricingRoute
   '/settings': typeof ProtectedSettingsRoute
   '/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
@@ -150,10 +150,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
   '/_protected/checkout': typeof ProtectedCheckoutRoute
   '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/_protected/new': typeof ProtectedNewRoute
+  '/_protected/pricing': typeof ProtectedPricingRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/dashboard/alerts': typeof ProtectedDashboardAlertsRoute
   '/_protected/dashboard/inbounds': typeof ProtectedDashboardInboundsRoute
@@ -169,10 +169,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/pricing'
     | '/checkout'
     | '/dashboard'
     | '/new'
+    | '/pricing'
     | '/settings'
     | '/dashboard/alerts'
     | '/dashboard/inbounds'
@@ -186,9 +186,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/pricing'
     | '/checkout'
     | '/new'
+    | '/pricing'
     | '/settings'
     | '/dashboard/alerts'
     | '/dashboard/inbounds'
@@ -203,10 +203,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
-    | '/pricing'
     | '/_protected/checkout'
     | '/_protected/dashboard'
     | '/_protected/new'
+    | '/_protected/pricing'
     | '/_protected/settings'
     | '/_protected/dashboard/alerts'
     | '/_protected/dashboard/inbounds'
@@ -222,7 +222,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -249,13 +248,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_protected/checkout': {
       id: '/_protected/checkout'
       path: '/checkout'
@@ -275,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof ProtectedNewRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/pricing': {
+      id: '/_protected/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof ProtectedPricingRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/settings': {
@@ -370,6 +369,7 @@ interface ProtectedRouteChildren {
   ProtectedCheckoutRoute: typeof ProtectedCheckoutRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren
   ProtectedNewRoute: typeof ProtectedNewRoute
+  ProtectedPricingRoute: typeof ProtectedPricingRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
 }
 
@@ -377,6 +377,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedCheckoutRoute: ProtectedCheckoutRoute,
   ProtectedDashboardRoute: ProtectedDashboardRouteWithChildren,
   ProtectedNewRoute: ProtectedNewRoute,
+  ProtectedPricingRoute: ProtectedPricingRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
 }
 
@@ -388,7 +389,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

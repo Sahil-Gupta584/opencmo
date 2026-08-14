@@ -91,6 +91,7 @@ export const createServer = (): Express => {
         req.socket.remoteAddress ||
         "-";
       console.log(`→ ${req.method} ${req.originalUrl} ip=${ip} ua=${req.headers["user-agent"] || "-"} ct=${req.headers["content-type"] || "-"}`);
+      console.log(`🍪 Cookies present in request: ${req.headers.cookie ? 'YES' : 'NO'}`);
       const start = Date.now();
       res.on("finish", () => {
         console.log(`← ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms`);

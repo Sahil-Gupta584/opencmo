@@ -15,6 +15,7 @@ export const auth = betterAuth({
   advanced: {
     crossSubDomainCookies: {
       enabled: true,
+      domain:"opencmo.site"
     },
   },
   telemetry: { enabled: false },

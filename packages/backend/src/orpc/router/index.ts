@@ -6,7 +6,7 @@ import { getNotificationPref, saveNotificationPref } from './notifications'
 import { getMentionsInterest, saveMentionsInterest, getAlertPref, saveAlertPref } from './prefs'
 import { createCheckout, getSubscription } from './billing'
 import { runFetchCycle, runDailyContentCycle } from './cron'
-import { listProjects as demoListProjects } from './demo'
+import { listProjects as demoListProjects, testDb } from './demo'
 
 export default {
   listTodos,
@@ -37,6 +37,7 @@ export default {
   runDailyContentCycle,
   demo: {
     listProjects: demoListProjects,
+    testDb,
   },
 }
 

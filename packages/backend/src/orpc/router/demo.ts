@@ -27,3 +27,12 @@ export const listProjects = base.handler(async () => {
 
   return project ? [project] : []
 })
+
+export const testDb = base.handler(async () => {
+  try {
+    const userCount = await prisma.user.count()
+    return { success: true, userCount, message: "Database connection is fully working!" }
+  } catch (e: any) {
+    throw new ORPCError('INTERNAL_SERVER_ERROR', { message: e.message })
+  }
+})

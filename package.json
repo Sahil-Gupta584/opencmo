@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "postinstall": "npm run db:generate",
     "clean": "turbo run clean",
     "dev": "turbo run dev --filter=web --filter=api",
     "dev:web": "npm run dev --workspace=web",

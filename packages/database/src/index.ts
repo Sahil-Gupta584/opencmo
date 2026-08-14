@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from './generated/prisma/client.js'
+import { PrismaClient } from '@prisma/client'
 import { Pool } from 'pg'
 
 const databaseUrl = process.env.DATABASE_URL
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalThis.__prisma = prisma
 }
 
-export { PrismaClient } from './generated/prisma/client.js'
+export { PrismaClient } from '@prisma/client'
 export type {
   Project,
   ProjectSubreddit,
@@ -33,6 +33,5 @@ export type {
   InboundCursor,
   User,
   UserApiConfig,
-} from './generated/prisma/client.js'
-export { Prisma } from './generated/prisma/client.js'
-export * as Enums from './generated/prisma/enums.js'
+} from '@prisma/client'
+export { Prisma } from '@prisma/client'

@@ -105,7 +105,7 @@ export const createServer = (): Express => {
       cors({
         origin: (origin, callback) => {
           const allowed = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()) ?? [
-            "http://localhost:3000",
+            process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
           ];
           if (!origin || allowed.includes(origin)) {
             callback(null, true);

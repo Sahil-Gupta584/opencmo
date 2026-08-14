@@ -10,8 +10,8 @@ import type { RouterClient } from '@orpc/server'
 import router from '@repo/backend/router'
 
 const apiBaseUrl =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5001'
-console.log({apiBaseUrl});
+  (import.meta.env.VITE_API_URL) || process.env.API_URL || 'http://localhost:5001'
+console.log((import.meta.env.VITE_API_URL) , process.env.VITE_API_URL );
 
 const getORPCClient = createIsomorphicFn()
   .server(() =>

@@ -19,7 +19,7 @@ export const env = createEnv({
     VITE_SENTRY_DSN: z.string().url().optional(),
     VITE_SENTRY_ORG: z.string().optional(),
     VITE_SENTRY_PROJECT: z.string().optional(),
-    VITE_API_URL: z.string().url().optional(),
+    VITE_API_URL: z.string().url(),
     VITE_BETTER_AUTH_URL: z.string().url(),
   },
   

@@ -5,11 +5,6 @@ import { magicLink } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { prisma } from "@repo/database";
 import { env } from "#/env";
-console.log({
-  a:env.VITE_BETTER_AUTH_URL,
-  b:env.BETTER_AUTH_URL,
-
-});
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,

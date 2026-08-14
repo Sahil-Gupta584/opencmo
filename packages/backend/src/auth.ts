@@ -5,10 +5,12 @@ import { prisma } from '@repo/database'
 import { env } from './env.js'
 import { Resend } from 'resend'
 
+console.log({  baseURL: env.BETTER_AUTH_URL,
+})
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: [env.BETTER_AUTH_URL, "https://www.opencmo.site", "https://api.opencmo.site"],
+  trustedOrigins: ["https://www.opencmo.site", "https://api.opencmo.site"],
   advanced: {
     crossSubDomainCookies: {
       enabled: true,

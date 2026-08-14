@@ -9,6 +9,7 @@ import { env } from "#/env";
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins: ["https://www.opencmo.site", "https://api.opencmo.site"],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -32,7 +33,7 @@ export const auth = betterAuth({
       clientId: env.GOOGLE_CLIENT_ID || '',
       clientSecret: env.GOOGLE_CLIENT_SECRET || '',
     },
-  },
+  },logger:{level:'debug'},
   plugins: [
     tanstackStartCookies(),
     magicLink({

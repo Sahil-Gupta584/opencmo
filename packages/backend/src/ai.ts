@@ -131,7 +131,7 @@ async function fetchWithRetry(options: {
       delay = Math.min(BASE_RETRY_MS * 2 ** attempt, 30000) + Math.floor(Math.random() * 250)
     }
     console.log(
-      `⚠️ ${label} rate-limited (HTTP ${res.status}), retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`,
+      `⚠️ ${label} rate-limited (HTTP ${res.status}), retrying in ${Math.round(delay/60)}s (attempt ${attempt + 1}/${maxRetries})`,
     )
     await sleep(delay)
   }
@@ -144,7 +144,7 @@ export async function callAI({ provider, apiKey, prompt, system, maxRetries = DE
 
   // 1. Google Gemini
   if (provider === 'gemini') {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`
     const { text } = await fetchWithRetry({
       provider,
       url,

@@ -32,12 +32,12 @@ export function ChannelFilterPills({ counts, selected, onSelect }: ChannelFilter
       icon: <RiTwitterXLine className="text-xs text-ink" />,
       iconClass: 'text-ink',
     },
-    {
-      key: 'linkedin',
-      label: `LinkedIn${counts.linkedin ? ` (${counts.linkedin})` : ''}`,
-      icon: <RiLinkedinBoxLine className="text-xs text-blue-600" />,
-      iconClass: 'text-blue-600',
-    },
+    // {
+    //   key: 'linkedin',
+    //   label: `LinkedIn${counts.linkedin ? ` (${counts.linkedin})` : ''}`,
+    //   icon: <RiLinkedinBoxLine className="text-xs text-blue-600" />,
+    //   iconClass: 'text-blue-600',
+    // },
   ]
 
   return (

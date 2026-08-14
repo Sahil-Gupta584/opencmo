@@ -40,7 +40,12 @@ export async function evaluatePostsBatchWithAI(
   aiOptions: { provider: AIProvider; apiKey: string },
 ): Promise<Map<string, EvaluatedLead>> {
   const resultMap = new Map<string, EvaluatedLead>()
-  if (rawPosts.length === 0) return resultMap
+  if (rawPosts.length === 0) {
+    console.log('[Evaluator] 🔵 No raw posts to evaluate, skipping AI calls')
+    return resultMap
+  }
+
+  console.log(`[Evaluator] 📦 Total candidates: ${rawPosts.length}`)
 
   // Construct character-budgeted batches to avoid overwhelming LLM
   const batches: RawPostCandidate[][] = []
@@ -65,6 +70,8 @@ export async function evaluatePostsBatchWithAI(
   }
   if (currentBatch.length > 0) batches.push(currentBatch)
 
+  console.log(`[Evaluator] 📊 Batched into ${batches.length} batch(es) (${MAX_BATCH_COUNT} posts or ${MAX_BATCH_CHARS} chars max per batch)`)
+
   const system = `You are a growth marketing AI evaluating social posts for lead opportunities.
 Product Context:
 - Name: ${project.name}
@@ -81,7 +88,8 @@ Strict Selection Rules:
 
 Note: Score and comment counts may be unavailable (reported as 0) depending on the data source. Judge posts purely on content and expressed intent, never on score or comment counts.`
 
-  for (const batch of batches) {
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i]
     const postsText = batch
       .map(
         (p, i) =>
@@ -90,6 +98,8 @@ Note: Score and comment counts may be unavailable (reported as 0) depending on t
       .join('\n---\n')
 
     const prompt = `Evaluate the following posts:\n${postsText}\n\nReturn ONLY a valid JSON array of objects for posts with isValid == true:\n[\n  {\n    "id": "post_id",\n    "isValid": true,\n    "priority": "high",\n    "intentReason": "User explicitly asking for Reddit marketing tools",\n    "indirectPitchStrategy": "Provide tips on Reddit organic reach first, then naturally mention OpenCMO as the tool we built"\n  }\n]`
+
+    console.log(`[Evaluator] 🤖 Batch ${i + 1}/${batches.length} - ${batch.length} posts, calling AI...`)
 
     try {
       const responseText = await callAI({
@@ -102,16 +112,22 @@ Note: Score and comment counts may be unavailable (reported as 0) depending on t
       const match = responseText.match(/\[[\s\S]*\]/)
       if (match) {
         const evaluatedList: EvaluatedLead[] = JSON.parse(match[0])
+        const approvedCount = evaluatedList.filter((item) => item.isValid).length
         evaluatedList.forEach((item) => {
           if (item.isValid) {
             resultMap.set(item.id, item)
           }
         })
+        console.log(`[Evaluator] ✅ Batch ${i + 1}/${batches.length} - ${approvedCount} approved, total approved so far: ${resultMap.size}`)
+      } else {
+        console.log(`[Evaluator] ⚠️  Batch ${i + 1}/${batches.length} - no valid JSON in response, 0 approved`)
       }
     } catch (err) {
-      console.error('🔴 Failed to evaluate batch with AI:', err)
+      console.error(`[Evaluator] 🔴 Batch ${i + 1}/${batches.length} - AI call failed:`, err)
     }
   }
+
+  console.log(`[Evaluator] 🏁 Done - ${resultMap.size}/${rawPosts.length} total approved`)
 
   return resultMap
 }

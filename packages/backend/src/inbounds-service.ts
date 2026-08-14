@@ -58,7 +58,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
   const { provider, apiKey } = getAiCredentials(apiConfig)
 
   // Atomically claim the fetch. If another run (cron or immediate fetch-on-create)
-  // is already in progress for this project, skip — don't double-evaluate.
+  // is already in progress for this project, skip - don't double-evaluate.
   const claimed = await prisma.project.updateMany({
     where: { id: project.id, isFetching: false },
     data: { isFetching: true },
@@ -152,6 +152,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
     }
 
     // 2. Evaluate candidate posts with AI in character-budgeted batches
+    console.log(`[Fetch] 🤖 Evaluating ${rawCandidates.length} candidates with AI...`)
     const evaluatedMap = await evaluatePostsBatchWithAI(rawCandidates, project, { provider, apiKey })
 
     // 3. Persist ONLY AI-approved valid leads; track which are genuinely new
@@ -159,6 +160,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
       const evalResult = evaluatedMap.get(post.id)
       return evalResult && evalResult.isValid
     })
+    console.log(`[Fetch] 📝 ${approved.length} leads approved, persisting to DB...`)
 
     const newLeads: NewLead[] = []
 
@@ -168,7 +170,9 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
         select: { redditId: true },
       })
       const existingIds = new Set(existing.map((e) => e.redditId))
+      console.log(`[Fetch] 🔎 ${existingIds.size} already in DB, ${approved.length - existingIds.size} genuinely new`)
 
+      let savedCount = 0
       for (const post of approved) {
         const evalResult = evaluatedMap.get(post.id)!
         const postDate = new Date(post.createdUtc * 1000)
@@ -209,6 +213,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
           },
         })
 
+        savedCount++
         if (isNew) {
           newLeads.push({
             id: post.id,
@@ -221,6 +226,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
           })
         }
       }
+      console.log(`[Fetch] 💾 ${savedCount} upserted, ${newLeads.length} genuinely new`)
     }
 
     return { success: true, count: newLeads.length, newLeads }

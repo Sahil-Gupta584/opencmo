@@ -163,11 +163,11 @@ export function MentionsBoard({ activeProjectId }: MentionsBoardProps) {
           },
           {
             title: 'Categorize',
-            desc: 'AI sorts each mention into clear buckets — "found a bug", "want this feature", "love it!".',
+            desc: 'AI sorts each mention into clear buckets - "found a bug", "want this feature", "love it!".',
           },
           {
             title: 'Act',
-            desc: 'Jump into the conversation fast with one click — before it goes cold.',
+            desc: 'Jump into the conversation fast with one click - before it goes cold.',
           },
         ].map((step) => (
           <div key={step.title} className="card-surface rounded-xl p-5">

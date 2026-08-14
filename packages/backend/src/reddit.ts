@@ -172,7 +172,7 @@ export async function fetchRedditThreadsJSON(
   afterUtc?: number,
 ): Promise<RawRedditPost[]> {
   const cleanSub = subreddit.replace(/^r\//, '').trim()
-  const timeParam = afterUtc ? 'all' : 'month' // first fetch = last month, subsequent = all (filtered by cursor)
+  const timeParam = afterUtc ? 'all' : 'week' // first fetch = last 7 days, subsequent = all (filtered by cursor)
 
   const posts = await fetchWithChannelFallback(cleanSub, keyword, timeParam)
   return filterPostsByCursor(posts, afterUtc, cleanSub, keyword, lastSource)

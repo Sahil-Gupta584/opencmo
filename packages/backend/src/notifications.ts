@@ -31,13 +31,14 @@ export async function sendNewLeadsEmail(
     return
   }
 
-  const topPriority = newLeads.reduce((acc, lead) => {
-    const rank = { high: 0, medium: 1, low: 2 }[lead.priority as 'high' | 'medium' | 'low'] ?? 1
-    const accRank = { high: 0, medium: 1, low: 2 }[acc.priority as 'high' | 'medium' | 'low'] ?? 1
-    return rank < accRank ? lead : acc
-  }, newLeads[0])
+  const priorityRank = { high: 0, medium: 1, low: 2 } as const
+  const topLeads = [...newLeads]
+    .sort((a, b) => (priorityRank[a.priority as keyof typeof priorityRank] ?? 1) - (priorityRank[b.priority as keyof typeof priorityRank] ?? 1))
+    .slice(0, 2)
 
-  const rows = newLeads
+  const topPriority = topLeads[0]
+
+  const rows = topLeads
     .map(
       (lead) => `
       <tr>
@@ -55,7 +56,7 @@ export async function sendNewLeadsEmail(
       <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
         <div style="padding:24px 28px;border-bottom:1px solid #E2E8F0;">
           <h1 style="margin:0;font-size:18px;color:#0F172A;font-weight:700;">${newLeads.length} new lead${newLeads.length > 1 ? 's' : ''} for ${projectName}</h1>
-          <p style="margin:6px 0 0;color:#64748B;font-size:13px;">Top pick: ${topPriority.title} - open OpenCMO to review and reply.</p>
+          <p style="margin:6px 0 0;color:#64748B;font-size:13px;">${newLeads.length} leads waiting for you in OpenCMO - here are the top ${topLeads.length}:</p>
         </div>
         <div style="padding:8px 28px 24px;">
           <table style="width:100%;border-collapse:collapse;">${rows}</table>
@@ -77,7 +78,7 @@ export async function sendNewLeadsEmail(
     if (error) {
       console.error(`🔴 [Notify] Resend error for user ${user.id}:`, error)
     } else {
-      console.log(`🟢 [Notify] Sent ${newLeads.length}-lead email to ${user.email} for ${projectName}`)
+      console.log(`🟢 [Notify] Sent top ${topLeads.length}/${newLeads.length}-lead email to ${user.email} for ${projectName}`)
     }
   } catch (err) {
     console.error(`🔴 [Notify] Failed to send email for user ${user.id}:`, err)

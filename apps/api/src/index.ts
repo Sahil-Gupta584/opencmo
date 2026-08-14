@@ -1,11 +1,7 @@
-import path from "node:path";
-import { config } from "dotenv";
+import "./env-init";
+import "@repo/backend";
+import { createServer } from "./server";
 
-config({ path: path.join(process.cwd(), "../../.env") });
-
-await import("@repo/backend");
-
-const { createServer } = await import("./server");
 const port = process.env.API_PORT || process.env.PORT || 5001;
 const server = createServer();
 

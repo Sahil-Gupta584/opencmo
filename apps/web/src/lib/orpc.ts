@@ -8,9 +8,7 @@ import { createIsomorphicFn } from '@tanstack/react-start'
 import type { RouterClient } from '@orpc/server'
 
 import router from '@repo/backend/router'
-import { env } from '#/env'
 
-console.log({ c: import.meta.env.VITE_API_URL, d: process.env.VITE_API_URL ,e:env.VITE_API_URL});
 const apiBaseUrl =
   (typeof process !== 'undefined' ? process.env.VITE_API_URL : import.meta.env.VITE_API_URL) || 
   import.meta.env.VITE_API_URL || 

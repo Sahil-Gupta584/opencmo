@@ -154,7 +154,10 @@ My Product: ${thread.project.name}
 Description: ${thread.project.description}
 Target Audience: ${thread.project.targetAudience}
 
-Write a helpful ${channelName} reply. Keep it concise.`
+Write a helpful ${channelName} reply. Keep it concise.
+Shouldnt sound like a ai generated, keep it short straight to the point. reply in a way that user might reply back, but make sure you dont ask question unnecessarily.
+`
+
 
   const reply = await callAI({ provider, apiKey, prompt, system })
 

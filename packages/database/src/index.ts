@@ -8,10 +8,25 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL is required')
 }
 
-const pool = new Pool({ connectionString: databaseUrl })
-const adapter = new PrismaPg(pool, {
-  schema: new URL(databaseUrl).searchParams.get('schema') ?? 'public',
+
+
+const pool = new Pool({ 
+  connectionString: databaseUrl,
+  // Cloud providers like Supabase require SSL. Disable it only for local dev.
+  ssl: databaseUrl.includes('localhost') ? false : { rejectUnauthorized: false }
 })
+
+// WORKAROUND: PrismaPg sometimes ignores the schema option. 
+// Force the schema on every new connection spawned by the pool.
+const schemaName = new URL(databaseUrl).searchParams.get('schema') ?? 'public';
+pool.on('connect', (client) => {
+  client.query(`SET search_path TO "${schemaName}", public`);
+});
+
+const adapter = new PrismaPg(pool, {
+  schema: schemaName,
+})
+
 
 declare global {
   var __prisma: PrismaClient | undefined

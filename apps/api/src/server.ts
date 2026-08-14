@@ -6,7 +6,8 @@ import express, {
   type Response as ExpressResponse,
 } from "express";
 import morgan from "morgan";
-
+import { handleDodoWebhook } from "./webhooks/dodo";
+import {openApiHandler, rpcHandler} from "@repo/backend";
 const { json, urlencoded } = bodyParser;
 
 type OrpcFetchHandler = {
@@ -22,10 +23,9 @@ let orpc: OrpcHandlers | undefined;
 
 async function getOrpc(): Promise<OrpcHandlers> {
   if (!orpc) {
-    const backend = await import("@repo/backend");
     orpc = {
-      rpcHandler: backend.rpcHandler,
-      openApiHandler: backend.openApiHandler,
+      rpcHandler,
+        openApiHandler,
     };
   }
   return orpc;
@@ -92,7 +92,6 @@ export const createServer = (): Express => {
         try {
           // Lazy import so @repo/database (which reads env at module load)
           // is only loaded after dotenv config has run in index.ts
-          const { handleDodoWebhook } = await import("./webhooks/dodo");
           await handleDodoWebhook(req, res);
         } catch (error) {
           next(error);

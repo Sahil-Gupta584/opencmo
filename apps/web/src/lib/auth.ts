@@ -1,3 +1,4 @@
+import { Resend } from 'resend'
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from 'better-auth'
 import { magicLink } from 'better-auth/plugins'
@@ -29,7 +30,6 @@ export const auth = betterAuth({
     tanstackStartCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        const { Resend } = await import('resend')
         const resend = new Resend(env.RESEND_API_KEY)
         const { error } = await resend.emails.send({
           from: 'noreply@chatcash.live',

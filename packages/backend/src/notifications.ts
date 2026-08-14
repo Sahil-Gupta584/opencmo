@@ -1,3 +1,4 @@
+import { Resend } from 'resend'
 import { env } from './env.js'
 import type { NewLead } from './inbounds-service.js'
 
@@ -66,7 +67,6 @@ export async function sendNewLeadsEmail(
     </div>`
 
   try {
-    const { Resend } = await import('resend')
     const resend = new Resend(env.RESEND_API_KEY)
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,

@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth'
 import { magicLink } from 'better-auth/plugins'
 import { prisma } from '@repo/database'
 import { env } from './env.js'
+import { Resend } from 'resend'
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
@@ -31,7 +32,6 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        const { Resend } = await import('resend')
         const resend = new Resend(env.RESEND_API_KEY)
         const { error } = await resend.emails.send({
           from: 'noreply@chatcash.live',

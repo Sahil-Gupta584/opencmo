@@ -11,7 +11,13 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
-  }),telemetry:{enabled:false},
+  }),
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+    },
+  },
+  telemetry: { enabled: false },
   user: {
     additionalFields: {
       plan: { type: "string", required: false, defaultValue: "FREE" },

@@ -88,7 +88,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </div>
 
         {/* Fetch Button */}
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <Button
             color="primary"
             startContent={<RiRefreshLine />}
@@ -99,7 +99,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
           >
             {fetchInboundsMutation.isPending ? 'Fetching...' : 'Fetch Now'}
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* ── Fetching Banner ─────────────────────────────────────────────── */}
@@ -149,7 +149,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
           description={
             activeTab === 'completed'
               ? 'Leads you mark as completed will appear here.'
-              : 'Click "Fetch Now" to scan Reddit, X, and LinkedIn for buying intent conversations.'
+              : 'We fetch leads in batches every 6 hours. You will get notified through Alerts!'
           }
         />
       ) : (

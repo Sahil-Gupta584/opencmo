@@ -23,13 +23,14 @@ export const env = createEnv({
   },
   
   runtimeEnv: {
+    // Explicitly map client variables so Vite statically injects them during the Vercel build
     VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
     VITE_SENTRY_ORG: import.meta.env.VITE_SENTRY_ORG,
     VITE_SENTRY_PROJECT: import.meta.env.VITE_SENTRY_PROJECT,
     VITE_API_URL: import.meta.env.VITE_API_URL,
-    VITE_BETTER_AUTH_URL: import.meta.env.VITE_BETTER_AUTH_URL,
+    VITE_BETTER_AUTH_URL: import.meta.env.VITE_BETTER_AUTH_URL || process.env.VITE_BETTER_AUTH_URL,
     
-    // Server envs
+    // Server variables (only needed in SSR / API routes)
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

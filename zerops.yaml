@@ -3,8 +3,6 @@ zerops:
     build:
       base: nodejs@22
       os: ubuntu
-      envVariables:
-        DATABASE_URL: ${DATABASE_URL}
       buildCommands:
         - npm install
         - npm run db:generate
@@ -33,18 +31,8 @@ zerops:
         NODE_ENV: production
         PORT: "5001"
         API_URL: "http://localhost:5001"
-        DATABASE_URL: ${DATABASE_URL}
-        BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-        CRON_SECRET: ${CRON_SECRET}
-        REDDIT_LOID: ${REDDIT_LOID}
-        RESEND_API_KEY: ${RESEND_API_KEY}
-        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-        FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY}
-        TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
-        DODO_API_KEY: ${DODO_API_KEY}
-        DODO_WEBHOOK_SECRET: ${DODO_WEBHOOK_SECRET}
-        DODO_INDIE_PRODUCT_ID: ${DODO_INDIE_PRODUCT_ID}
-        DODO_PRO_PRODUCT_ID: ${DODO_PRO_PRODUCT_ID}
-        DODO_MODE: ${DODO_MODE}
+      crontab:
+        - command: "node apps/api/dist/cron/fetch-inbounds.js"
+          timing: "0 */2 * * *"
+        - command: "node apps/api/dist/cron/generate-daily-content.js"
+          timing: "0 6 * * *"

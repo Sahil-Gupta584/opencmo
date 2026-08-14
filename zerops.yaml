@@ -33,6 +33,6 @@ zerops:
         API_URL: "http://localhost:5001"
       crontab:
         - command: "node apps/api/dist/cron/fetch-inbounds.js"
-          timing: "0 */12 * * *"
+          timing: "0 */6 * * *"
         - command: "node apps/api/dist/cron/generate-daily-content.js"
           timing: "0 6 * * *"

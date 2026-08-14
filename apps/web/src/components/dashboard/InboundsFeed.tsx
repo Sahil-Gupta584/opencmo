@@ -107,7 +107,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         <div className="mb-6 flex items-center gap-3 rounded-xl border border-coral/30 bg-coral/10 px-4 py-3">
           <Spinner size="sm" color="primary" />
           <p className="text-sm font-medium text-coral-dark">
-            Fetching new leads for this product… we'll show them here as soon as the scan finishes.
+            Fetching new leads for this product… we'll notify you as soon we find leads.
           </p>
         </div>
       )}

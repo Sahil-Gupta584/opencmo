@@ -10,11 +10,11 @@ console.log({  baseURL: env.BETTER_AUTH_URL,
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: ["https://www.opencmo.site", "https://api.opencmo.site"],
+  // trustedOrigins: ["https://www.opencmo.site", "https://api.opencmo.site"],
   advanced: {
     crossSubDomainCookies: {
-      enabled: true,
-      domain:"opencmo.site"
+      enabled: env.BETTER_AUTH_URL.includes("opencmo.site"),
+      domain: "opencmo.site"
     },
   },
   logger: {

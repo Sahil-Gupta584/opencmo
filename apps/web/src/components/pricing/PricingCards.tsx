@@ -1,6 +1,6 @@
-import { Button } from '@heroui/react'
+import { Button, Spinner } from '@heroui/react'
 import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouteContext } from '@tanstack/react-router'
 import { useState } from 'react'
 import { RiCheckLine } from 'react-icons/ri'
 import { orpc } from '#/lib/orpc'
@@ -31,26 +31,30 @@ const PLANS: {
     ],
     highlight: true,
   },
-  {
-    key: 'PRO',
-    name: 'Pro',
-    price: '$39',
-    blurb: 'Platform access with hosted AI usage included out of the box.',
-    features: [
-      { text: 'Hosted AI Included (No API key needed)', accent: true },
-      { text: 'Up to 5 Products' },
-      { text: 'Unlimited Inbound leads' },
-      { text: 'Unlimited Subreddits' },
-      { text: 'Fast background polling (every 2h)' },
-      { text: 'Priority support' },
-    ],
-    highlight: false,
-  },
+  // {
+  //   key: 'PRO',
+  //   name: 'Pro',
+  //   price: '$39',
+  //   blurb: 'Platform access with hosted AI usage included out of the box.',
+  //   features: [
+  //     { text: 'Hosted AI Included (No API key needed)', accent: true },
+  //     { text: 'Up to 5 Products' },
+  //     { text: 'Unlimited Inbound leads' },
+  //     { text: 'Unlimited Subreddits' },
+  //     { text: 'Fast background polling (every 2h)' },
+  //     { text: 'Priority support' },
+  //   ],
+  //   highlight: false,
+  // },
 ]
 
 export function PricingCards() {
   const navigate = useNavigate()
+  const context = useRouteContext({ strict: false }) as any
+  const user = context?.user
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const isProcessing = user?.subscriptionStatus === 'processing'
 
   const checkout = useMutation({
     ...orpc.createCheckout.mutationOptions(),
@@ -78,6 +82,13 @@ export function PricingCards() {
       {errorMsg && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 text-center">
           {errorMsg}
+        </div>
+      )}
+
+      {isProcessing && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 text-center flex items-center justify-center gap-2">
+          <Spinner size="sm" color="warning" />
+          <span>Your subscription is being processed. You'll have access shortly.</span>
         </div>
       )}
 
@@ -116,18 +127,32 @@ export function PricingCards() {
               </ul>
             </div>
             <div className="pt-8">
-              <Button
-                id={`btn-subscribe-${plan.key.toLowerCase()}`}
-                color="primary"
-                size="lg"
-                fullWidth
-                variant={plan.key === 'PRO' ? 'bordered' : 'solid'}
-                className={plan.key === 'PRO' ? 'border-line-strong font-medium' : 'font-semibold'}
-                isLoading={checkout.isPending && checkout.variables?.plan === plan.key}
-                onPress={() => handleSubscribe(plan.key)}
-              >
-                {plan.key === 'INDIE' ? 'Subscribe for $5/mo' : 'Get Pro for $39/mo'}
-              </Button>
+              {isProcessing ? (
+                <Button
+                  color="primary"
+                  size="lg"
+                  fullWidth
+                  variant={plan.key === 'PRO' ? 'bordered' : 'solid'}
+                  className={plan.key === 'PRO' ? 'border-line-strong font-medium' : 'font-semibold'}
+                  isDisabled
+                >
+                  <Spinner size="sm" color="current" className="mr-2" />
+                  Processing...
+                </Button>
+              ) : (
+                <Button
+                  id={`btn-subscribe-${plan.key.toLowerCase()}`}
+                  color="primary"
+                  size="lg"
+                  fullWidth
+                  variant={plan.key === 'PRO' ? 'bordered' : 'solid'}
+                  className={plan.key === 'PRO' ? 'border-line-strong font-medium' : 'font-semibold'}
+                  isLoading={checkout.isPending && checkout.variables?.plan === plan.key}
+                  onPress={() => handleSubscribe(plan.key)}
+                >
+                  {plan.key === 'INDIE' ? 'Subscribe for $5/mo' : 'Get Pro for $39/mo'}
+                </Button>
+              )}
             </div>
           </div>
         ))}

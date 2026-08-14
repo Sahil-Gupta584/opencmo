@@ -57,40 +57,7 @@ export const authed = base.use(async ({ context, next }) => {
 			}
 		}
 	}
-
-	// Debug: Log all headers
-	console.log("=== AUTH DEBUG ===")
-	console.log("Headers object type:", context.headers.constructor.name)
-	console.log("User-Agent:", headers.get("user-agent"))
-	console.log("Referer:", headers.get("referer"))
-	console.log("Origin:", headers.get("origin"))
-
-	// Check for cookies
-	const cookieHeader = headers.get("cookie")
-	console.log("Cookie header present:", !!cookieHeader)
-	console.log("Cookie header length:", cookieHeader?.length)
-
-	if (cookieHeader) {
-		console.log("Cookies found:")
-		cookieHeader.split(";").forEach(c => {
-			const trimmed = c.trim()
-			const [name] = trimmed.split("=")
-			console.log(`  - ${name}: ${trimmed.includes("better-auth") ? "✓" : ""}`)
-		})
-
-		// Specifically check for better-auth cookies
-		const hasSessionToken = cookieHeader.includes("better-auth.session_token")
-		console.log("Has better-auth.session_token:", hasSessionToken)
-	} else {
-		console.log("❌ NO COOKIE HEADER - This is why auth is failing!")
-	}
-
-	// Check for Authorization header (Bearer token alternative)
-	const authHeader = headers.get("authorization")
-	console.log("Authorization header:", authHeader ? "present" : "missing")
-
-	console.log("==================")
-
+	
 	try {
 		const session = await auth.api.getSession({ headers })
 
@@ -108,15 +75,6 @@ export const authed = base.use(async ({ context, next }) => {
 		})
 	} catch (error) {
 		console.error("getSession threw error:", error)
-				
-		// Let's test if the DB is actually reachable!
-		try {
-			await prisma.user.findFirst();
-			console.log("✅ Database connection is WORKING");
-		} catch (dbError) {
-			console.error("❌ DATABASE ERROR! Prisma failed to connect. Your DATABASE_URL in Zerops might be wrong or unreachable:", dbError);
-		}
-
 		throw error
 	}
 })

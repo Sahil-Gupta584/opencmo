@@ -31,6 +31,26 @@ export async function handleDodoWebhook(req: Request, res: Response): Promise<vo
     console.log('[webhook] received event:', event.type)
 
     switch (event.type) {
+      case 'payment.processing': {
+        const payment = event.data
+        const userId = payment.metadata?.userId as string | undefined
+        const plan = payment.metadata?.plan as string | undefined
+        if (!userId) {
+          console.warn('[webhook] payment.processing missing userId in metadata')
+          break
+        }
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            plan: plan === 'PRO' ? 'PRO' : plan === 'INDIE' ? 'INDIE' : undefined,
+            subscriptionStatus: 'processing',
+          },
+        })
+        console.log(`[webhook] 🟡 User ${userId} payment processing for plan ${plan || 'unknown'}`)
+        break
+      }
+
       case 'subscription.active': {
         const sub = event.data
         const userId = sub.metadata?.userId as string | undefined

@@ -28,6 +28,25 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+const providerLocks: Record<string, Promise<void>> = {}
+
+/**
+ * Enforces a minimum delay between outgoing requests for a specific provider
+ * to avoid triggering provider rate limits (e.g., Gemini's 15 RPM free tier).
+ */
+async function enforceRateLimit(provider: string, minDelayMs: number) {
+  if (minDelayMs <= 0) return
+  
+  const prev = providerLocks[provider] || Promise.resolve()
+  const next = prev.then(async () => {
+    await sleep(minDelayMs)
+  }).catch(() => {})
+  
+  providerLocks[provider] = next
+  await prev
+}
+
+
 /**
  * Extracts a retry delay (ms) from the response, if the provider tells us one.
  * Sources (in priority order):
@@ -87,6 +106,10 @@ async function fetchWithRetry(options: {
   const { provider, url, headers, body, maxRetries } = options
 
   for (let attempt = 0; ; attempt++) {
+    // Gemini free tier is ~15 RPM. 60s / 15 = 4s. Add a small buffer (4100ms).
+    const rateLimitMs = provider === 'gemini' ? 4100 : 0
+    await enforceRateLimit(provider, rateLimitMs)
+
     const res = await fetch(url, {
       method: 'POST',
       headers,

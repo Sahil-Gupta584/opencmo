@@ -10,6 +10,7 @@ import { useState } from 'react'
 import {
   RiRefreshLine,
   RiInboxLine,
+  RiCheckDoubleLine,
 } from 'react-icons/ri'
 import { ThreadCard } from './atoms/ThreadCard'
 import { ChannelFilterPills, type ChannelKey } from './atoms/ChannelFilterPills'
@@ -76,6 +77,17 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
     }),
   )
 
+  const markCompleteMutation = useMutation(
+    orpc.markThreadsComplete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries()
+      },
+      onError: (err) => {
+        console.error('🔴 Failed to mark threads complete:', err)
+      },
+    }),
+  )
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -130,11 +142,35 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </Tabs>
 
         {/* Channel Filter Pills */}
-        <ChannelFilterPills
-          counts={{ reddit: threadCounts?.reddit ?? 0, twitter: threadCounts?.twitter ?? 0, linkedin: threadCounts?.linkedin ?? 0 }}
-          selected={selectedChannel}
-          onSelect={setSelectedChannel}
-        />
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+          <ChannelFilterPills
+            counts={{ reddit: threadCounts?.reddit ?? 0, twitter: threadCounts?.twitter ?? 0, linkedin: threadCounts?.linkedin ?? 0 }}
+            selected={selectedChannel}
+            onSelect={setSelectedChannel}
+          />
+
+          {activeTab === 'active' && threads.length > 0 && (
+            <Button
+              size="sm"
+              variant="flat"
+              color="success"
+              startContent={<RiCheckDoubleLine className="text-sm" />}
+              isLoading={markCompleteMutation.isPending}
+              isDisabled={markCompleteMutation.isPending}
+              onPress={() =>
+                activeProjectId &&
+                markCompleteMutation.mutate({
+                  projectId: activeProjectId,
+                  channel: selectedChannel,
+                  threadIds: threads.map((t) => t.id),
+                })
+              }
+              className="h-8 font-medium text-xs"
+            >
+              Mark all as complete
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* ── Threads Feed ────────────────────────────────────────────────── */}

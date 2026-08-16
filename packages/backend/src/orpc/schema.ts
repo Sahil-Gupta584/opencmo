@@ -64,6 +64,12 @@ export const UpdateThreadStatusSchema = z.object({
   isDone: z.boolean(),
 })
 
+export const MarkThreadsCompleteSchema = z.object({
+  projectId: z.string(),
+  channel: z.enum(['reddit', 'twitter', 'linkedin']),
+  threadIds: z.array(z.string()).min(1),
+})
+
 export const GenerateThreadReplySchema = z.object({
   threadId: z.string(),
 })

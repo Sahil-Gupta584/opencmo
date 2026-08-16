@@ -9,7 +9,7 @@ import {
   ListThreadsSchema,
   ListThreadCountsSchema,
   UpdateThreadStatusSchema,
-  GenerateThreadReplySchema,
+  MarkThreadsCompleteSchema,
 } from '../schema.js'
 import { ORPCError } from '@orpc/client'
 
@@ -122,6 +122,32 @@ export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler
     where: { id: input.threadId },
     data: { isDone: input.isDone },
   })
+})
+
+export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handler(async ({ input, context }) => {
+  const userId = context.user.id
+
+  const project = await prisma.project.findFirst({
+    where: { id: input.projectId, userId },
+  })
+
+  if (!project) {
+    throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
+  }
+
+  const result = await prisma.redditThread.updateMany({
+    where: {
+      projectId: input.projectId,
+      id: { in: input.threadIds },
+      channel: input.channel,
+      isDone: false,
+    },
+    data: { isDone: true },
+  })
+
+  console.log(`[Threads] ✅ Marked ${result.count} ${input.channel} threads complete for project ${input.projectId}`)
+
+  return { count: result.count }
 })
 
 export const generateThreadReply = authed.input(GenerateThreadReplySchema).handler(async ({ input, context }) => {

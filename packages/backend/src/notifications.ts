@@ -22,6 +22,14 @@ export async function sendNewLeadsEmail(
   newLeads: NewLead[],
 ): Promise<void> {
   if (newLeads.length === 0) return
+
+  // Lead emails only carry Reddit leads - other channels stay out of the inbox digest
+  const redditLeads = newLeads.filter((lead) => lead.channel === 'reddit')
+  if (redditLeads.length === 0) {
+    console.log(`🔵 [Notify] No Reddit leads for ${projectName} - skipping email`)
+    return
+  }
+
   if (!user.notifyNewLeads) {
     console.log(`🔵 [Notify] User ${user.id} disabled lead notifications - skipping email`)
     return
@@ -32,7 +40,7 @@ export async function sendNewLeadsEmail(
   }
 
   const priorityRank = { high: 0, medium: 1, low: 2 } as const
-  const topLeads = [...newLeads]
+  const topLeads = [...redditLeads]
     .sort((a, b) => (priorityRank[a.priority as keyof typeof priorityRank] ?? 1) - (priorityRank[b.priority as keyof typeof priorityRank] ?? 1))
     .slice(0, 2)
 
@@ -51,15 +59,20 @@ export async function sendNewLeadsEmail(
     )
     .join('')
 
+  const inboundUrl = `${env.BETTER_AUTH_URL}/dashboard/inbounds`
+
   const html = `
     <div style="background:#FAFAFA;padding:24px;font-family:Inter, -apple-system, sans-serif;">
       <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
         <div style="padding:24px 28px;border-bottom:1px solid #E2E8F0;">
-          <h1 style="margin:0;font-size:18px;color:#0F172A;font-weight:700;">${newLeads.length} new lead${newLeads.length > 1 ? 's' : ''} for ${projectName}</h1>
-          <p style="margin:6px 0 0;color:#64748B;font-size:13px;">${newLeads.length} leads waiting for you in OpenCMO - here are the top ${topLeads.length}:</p>
+          <h1 style="margin:0;font-size:18px;color:#0F172A;font-weight:700;">${redditLeads.length} new Reddit lead${redditLeads.length > 1 ? 's' : ''} for ${projectName}</h1>
+          <p style="margin:6px 0 0;color:#64748B;font-size:13px;">${redditLeads.length} leads waiting for you in OpenCMO - here are the top ${topLeads.length}:</p>
         </div>
         <div style="padding:8px 28px 24px;">
           <table style="width:100%;border-collapse:collapse;">${rows}</table>
+        </div>
+        <div style="padding:16px 28px;">
+          <a href="${inboundUrl}" style="display:inline-block;background:#4F46E5;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">Open Inbound Page</a>
         </div>
         <div style="padding:16px 28px;background:#F8FAFC;border-top:1px solid #E2E8F0;color:#64748B;font-size:12px;">
           Reply fast - Reddit threads decay quickly. You're receiving this because new buying-intent leads were found for ${projectName}.
@@ -72,13 +85,13 @@ export async function sendNewLeadsEmail(
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: user.email,
-      subject: `${newLeads.length} new lead${newLeads.length > 1 ? 's' : ''} for ${projectName}`,
+      subject: `${redditLeads.length} new Reddit lead${redditLeads.length > 1 ? 's' : ''} for ${projectName}`,
       html,
     })
     if (error) {
       console.error(`🔴 [Notify] Resend error for user ${user.id}:`, error)
     } else {
-      console.log(`🟢 [Notify] Sent top ${topLeads.length}/${newLeads.length}-lead email to ${user.email} for ${projectName}`)
+      console.log(`🟢 [Notify] Sent top ${topLeads.length}/${redditLeads.length}-lead email to ${user.email} for ${projectName}`)
     }
   } catch (err) {
     console.error(`🔴 [Notify] Failed to send email for user ${user.id}:`, err)

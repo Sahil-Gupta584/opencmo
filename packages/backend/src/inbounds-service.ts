@@ -14,6 +14,7 @@ export interface NewLead {
   priority: string
   intentReason: string | null
   redditCreatedAt: Date
+  channel: string
 }
 
 export interface FetchInboundsResult {
@@ -223,6 +224,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
             priority: evalResult.priority ?? 'medium',
             intentReason: combinedReason,
             redditCreatedAt: postDate,
+            channel: post.channel || 'reddit',
           })
         }
       }

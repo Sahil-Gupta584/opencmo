@@ -8,6 +8,11 @@ export interface RedditSubredditInfo {
   rulesJson?: string
 }
 
+export interface RedditRule {
+  shortName: string
+  description: string
+}
+
 export interface RedditThreadInfo {
   title: string
   url: string
@@ -69,10 +74,11 @@ export async function fetchSubredditDetails(
 
   if (about?.kind === 'ok') {
     console.log(`[SubredditAbout] 🟢 ${fullName}: fetched details from Reddit`)
+    const rules = await fetchSubredditRules(cleanName)
     return {
       name: fullName,
       description: about.description,
-      rulesJson: undefined,
+      rulesJson: serializeRules(rules),
     }
   }
 
@@ -132,6 +138,84 @@ async function fetchSubredditAboutJSON(
   } catch (err) {
     console.error(`[SubredditAbout] 🔴 Error fetching r/${cleanName}:`, err)
     return { kind: 'error' }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Subreddit rules (authoritative, via public about/rules.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches a subreddit's real automod rules from the public JSON endpoint
+ * (same auth path as search.json - uses the loid cookie only).
+ *
+ * Rules have a 24h cache enforced by ProjectSubreddit.rulesJson + updatedAt,
+ * so this network call only happens when the cache is cold.
+ */
+export async function fetchSubredditRules(cleanName: string): Promise<RedditRule[] | null> {
+  const cleanSub = cleanName.replace(/^r\//, '').trim()
+  const url = `https://www.reddit.com/r/${cleanSub}/about/rules.json`
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': REDDIT_USER_AGENT,
+        Accept: 'application/json',
+        Cookie: env.REDDIT_COOKIE,
+      },
+    })
+
+    if (res.status === 404) return null
+    if (!res.ok) {
+      console.error(`[SubredditRules] 🔴 HTTP ${res.status} for r/${cleanSub}`)
+      return null
+    }
+
+    const json = (await res.json()) as {
+      rules?: { short_name?: string; description?: string; kind?: string }[]
+    }
+    const rules = (json?.rules ?? [])
+      .filter((r) => r.short_name || r.description)
+      .map((r) => ({
+        shortName: r.short_name || '',
+        description: r.description || '',
+      }))
+
+    if (rules.length > 0) {
+      console.log(`[SubredditRules] 🟢 ${rules.length} rules fetched for r/${cleanSub}`)
+    } else {
+      console.log(`[SubredditRules] 🔵 No rules returned for r/${cleanSub}`)
+    }
+    return rules
+  } catch (err) {
+    console.error(`[SubredditRules] 🔴 Error fetching rules for r/${cleanSub}:`, err)
+    return null
+  }
+}
+
+export function serializeRules(rules: RedditRule[] | null | undefined): string | undefined {
+  if (!rules || rules.length === 0) return undefined
+  return JSON.stringify(rules)
+}
+
+export function parseRules(rulesJson: string | null | undefined): RedditRule[] {
+  if (!rulesJson) return []
+  try {
+    const parsed = JSON.parse(rulesJson)
+    const list = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.rules)
+        ? parsed.rules
+        : []
+    return list
+      .filter((r: unknown) => r && typeof r === 'object')
+      .map((r: Record<string, unknown>) => ({
+        shortName: String(r.shortName ?? r.short_name ?? ''),
+        description: String(r.description ?? ''),
+      }))
+      .filter((r: RedditRule) => r.shortName || r.description)
+  } catch {
+    return []
   }
 }
 

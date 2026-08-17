@@ -22,12 +22,13 @@ export function ThreadCard({
   onGenerateReply,
   onToggleStatus,
 }: ThreadCardProps) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (key: string, text: string) => {
+    if (!text) return
     navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(key)
+    setTimeout(() => setCopied(null), 2000)
   }
 
   return (
@@ -63,12 +64,34 @@ export function ThreadCard({
         </div>
 
         {/* Title & snippet */}
-        <div>
-          <h3 className="text-base font-bold text-ink leading-snug">{thread.title}</h3>
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-base font-bold text-ink leading-snug">{thread.title}</h3>
+            {thread.title && (
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                className="shrink-0 h-7 w-7 text-faint"
+                startContent={copied === 'title' ? <RiCheckLine /> : <RiFileCopyLine />}
+                onPress={() => handleCopy('title', thread.title)}
+                aria-label="Copy title"
+              />
+            )}
+          </div>
           {thread.body && (
-            <p className="mt-2 text-sm text-muted leading-relaxed bg-sand p-3 rounded-lg border border-line">
-              {thread.body}
-            </p>
+            <div className="flex items-start justify-between gap-2 bg-sand p-3 rounded-lg border border-line">
+              <p className="text-sm text-muted leading-relaxed">{thread.body}</p>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                className="shrink-0 h-7 w-7 text-faint"
+                startContent={copied === 'body' ? <RiCheckLine /> : <RiFileCopyLine />}
+                onPress={() => handleCopy('body', thread.body ?? '')}
+                aria-label="Copy body"
+              />
+            </div>
           )}
         </div>
 
@@ -84,13 +107,28 @@ export function ThreadCard({
                 variant="flat"
                 color="primary"
                 className="h-7 text-xs font-semibold"
-                startContent={copied ? <RiCheckLine /> : <RiFileCopyLine />}
-                onPress={() => handleCopy(thread.generatedReply ?? '')}
+                startContent={copied === 'reply' ? <RiCheckLine /> : <RiFileCopyLine />}
+                onPress={() => handleCopy('reply', thread.generatedReply ?? '')}
               >
-                {copied ? 'Copied!' : 'Copy Reply'}
+                {copied === 'reply' ? 'Copied!' : 'Copy Reply'}
               </Button>
             </div>
             <p className="text-sm text-ink leading-relaxed font-normal">{thread.generatedReply}</p>
+            {!readOnly && (
+              <div className="flex items-center justify-end pt-2 border-t border-coral/15">
+                <Button
+                  size="sm"
+                  variant="light"
+                  color={thread.isDone ? 'default' : 'success'}
+                  isLoading={isUpdating}
+                  startContent={!isUpdating && <RiCheckLine />}
+                  onPress={() => onToggleStatus?.(thread)}
+                  className="font-medium"
+                >
+                  {thread.isDone ? 'Re-open' : 'Mark as Completed'}
+                </Button>
+              </div>
+            )}
           </div>
         ) : readOnly ? (
           <div className="flex items-center justify-between pt-2 border-t border-line">

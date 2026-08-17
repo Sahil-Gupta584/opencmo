@@ -10,8 +10,10 @@ import {
   ListThreadCountsSchema,
   UpdateThreadStatusSchema,
   MarkThreadsCompleteSchema,
+  GenerateThreadReplySchema,
 } from '../schema.js'
 import { ORPCError } from '@orpc/client'
+import { fetchSubredditRules, parseRules } from '../../reddit.js'
 
 function getAiCredentials(apiConfig: any) {
   const provider = (apiConfig.defaultProvider || 'openai') as 'openai' | 'anthropic' | 'gemini'
@@ -20,6 +22,45 @@ function getAiCredentials(apiConfig: any) {
   else if (provider === 'anthropic') apiKey = decrypt(apiConfig.anthropicKey || '')
   else apiKey = decrypt(apiConfig.openaiKey || '')
   return { provider, apiKey }
+}
+
+/**
+ * Loads a subreddit's rules for prompt injection. Uses the DB cache first
+ * (rulesJson persisted at create/refresh); falls back to a live fetch when
+ * missing. Fail-open: returns '' so a rules fetch never blocks reply gen.
+ */
+async function getSubredditRulesPrompt(projectId: string, subredditName: string): Promise<string> {
+  try {
+    const existing = await prisma.projectSubreddit.findFirst({
+      where: { projectId, name: subredditName },
+      select: { id: true, rulesJson: true, description: true },
+    })
+
+    let rules = parseRules(existing?.rulesJson)
+
+    // Cold cache - fetch authoritative rules and persist them.
+    if (rules.length === 0) {
+      const cleanName = subredditName.replace(/^r\//, '').trim()
+      const fetched = await fetchSubredditRules(cleanName)
+      rules = fetched ?? []
+      if (rules.length > 0 && existing) {
+        await prisma.projectSubreddit.update({
+          where: { id: existing.id },
+          data: { rulesJson: JSON.stringify(rules) },
+        })
+      }
+    }
+
+    if (rules.length === 0) return ''
+
+    const rulesText = rules
+      .map((r) => `- ${r.shortName || 'Rule'}: ${r.description}`)
+      .join('\n')
+    return `\nCommunity rules you MUST comply with (violating these gets the post removed or a ban):\n${rulesText}`
+  } catch (err) {
+    console.error(`🔴 getSubredditRulesPrompt failed for ${subredditName}:`, err)
+    return ''
+  }
 }
 
 export const fetchInbounds = authed.input(FetchInboundsSchema).handler(async ({ input, context }) => {
@@ -169,7 +210,11 @@ export const generateThreadReply = authed.input(GenerateThreadReplySchema).handl
 
   const channelName = thread.channel === 'twitter' ? 'X (Twitter)' : thread.channel === 'linkedin' ? 'LinkedIn' : 'Reddit'
 
-  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.`
+  const rulesPrompt = thread.channel === 'reddit'
+    ? await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
+    : ''
+
+  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.${rulesPrompt}`
 
   const prompt = `Platform: ${channelName}
 Thread Title: ${thread.title}

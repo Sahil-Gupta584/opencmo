@@ -119,6 +119,7 @@ export const createProject = authed.input(CreateProjectSchema).handler(async ({ 
         projectId: project.id,
         name: details.name,
         description: details.description,
+        rulesJson: details.rulesJson ?? null,
         relevance: 95,
       },
     })
@@ -192,7 +193,7 @@ Return a JSON array of strings containing exact subreddit names with r/ prefix (
   // Clear existing and replace with real discovered subreddits
   await prisma.projectSubreddit.deleteMany({ where: { projectId: project.id } })
 
-  const subredditDetails: { projectId: string; name: string; description: string; relevance: number }[] = []
+  const subredditDetails: { projectId: string; name: string; description: string; rulesJson: string | null; relevance: number }[] = []
   for (const subName of subList) {
     const details = await fetchSubredditDetails(subName, { provider, apiKey })
     if (!details) {
@@ -203,6 +204,7 @@ Return a JSON array of strings containing exact subreddit names with r/ prefix (
       projectId: project.id,
       name: details.name,
       description: details.description,
+      rulesJson: details.rulesJson ?? null,
       relevance: 95,
     })
   }
@@ -247,6 +249,7 @@ export const addSubreddit = authed.input(AddSubredditSchema).handler(async ({ in
       projectId: project.id,
       name: details.name,
       description: details.description,
+      rulesJson: details.rulesJson ?? null,
       relevance: 95,
     },
   })

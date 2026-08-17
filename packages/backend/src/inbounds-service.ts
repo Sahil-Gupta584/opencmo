@@ -140,7 +140,7 @@ export async function fetchInboundsForProject(projectId: string): Promise<FetchI
     // 1b. Fetch live tweets from X (Twitter) if X_HOST + X_KEY are set (RapidAPI scraper)
     if (env.X_HOST && env.X_KEY) {
       for (const kw of keywords) {
-        const tweets = await fetchXTweets(kw, { host: env.X_HOST, apiKey: env.X_KEY })
+        const tweets = await fetchXTweets(kw, { host: env.X_HOST, apiKey: env.X_KEY, minFollowers: 150 })
         rawCandidates.push(...tweets)
       }
     }

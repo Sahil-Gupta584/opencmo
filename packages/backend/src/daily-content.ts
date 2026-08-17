@@ -1,6 +1,7 @@
 import { prisma } from '@repo/database'
 import { callAI } from './ai.js'
 import { decrypt } from './crypto.js'
+import { fetchSubredditRules } from './reddit.js'
 
 const ARTICLE_TONES = ['Professional', 'Conversational', 'Story-driven', 'Data-driven', 'Educational', 'Thought-leadership']
 const SOCIAL_TONES = ['Witty', 'Bold', 'Casual', 'Professional', 'Inspirational', 'Curious']
@@ -38,13 +39,18 @@ function buildPrompt(opts: {
   contentType: 'article' | 'social'
   tone: string
   angle: string
+  rulesText?: string
 }) {
   const { contentType, tone, angle } = opts
   const isArticle = contentType === 'article'
 
+  const rulesBlock = opts.rulesText
+    ? `\nCommunity rules you MUST comply with (violating these gets the post removed or a ban):\n${opts.rulesText}`
+    : ''
+
   const system = isArticle
-    ? `You are an expert content marketer and community strategist. Write long-form, value-first content that reads authentic and human - never corporate, never promotional fluff. Structure the piece with a strong opening hook and clear flow. Avoid heavy link dropping and overt self-promotion.`
-    : `You are an expert social media copywriter. Write short, punchy, native-sounding social posts (X/Twitter, LinkedIn, Reddit). Hook in the first line, value first, product mention only if it fits naturally. No hashtag spam, no emoji soup, no corporate jargon.`
+    ? `You are an expert content marketer and community strategist. Write long-form, value-first content that reads authentic and human - never corporate, never promotional fluff. Structure the piece with a strong opening hook and clear flow. Avoid heavy link dropping and overt self-promotion.${rulesBlock}`
+    : `You are an expert social media copywriter. Write short, punchy, native-sounding social posts (X/Twitter, LinkedIn, Reddit). Hook in the first line, value first, product mention only if it fits naturally. No hashtag spam, no emoji soup, no corporate jargon.${rulesBlock}`
 
   const contextBlock = `Product: ${opts.project.name}
 Description: ${opts.project.description}
@@ -75,6 +81,61 @@ Return ONLY valid raw JSON with exactly these keys:
   return { system, prompt }
 }
 
+/**
+ * Gathers community rules across a project's monitored subreddits (best-effort).
+ * Uses the DB cache first; fetches authoritative rules when the cache is cold.
+ * Never throws - any failure yields an empty string.
+ */
+async function gatherSubredditRules(projectId: string): Promise<string> {
+  try {
+    const subs = await prisma.projectSubreddit.findMany({
+      where: { projectId },
+      select: { name: true, rulesJson: true },
+    })
+    if (subs.length === 0) return ''
+
+    const seen = new Set<string>()
+    const lines: string[] = []
+
+    for (const sub of subs) {
+      let rules: { shortName: string; description: string }[] = []
+      if (sub.rulesJson) {
+        try {
+          rules = JSON.parse(sub.rulesJson)
+        } catch {
+          rules = []
+        }
+      }
+
+      // Cold cache - fetch authoritative rules and persist them.
+      if (rules.length === 0) {
+        const cleanName = sub.name.replace(/^r\//, '').trim()
+        const fetched = await fetchSubredditRules(cleanName)
+        rules = fetched ?? []
+        if (rules.length > 0) {
+          await prisma.projectSubreddit.update({
+            where: { projectId_name: { projectId, name: sub.name } },
+            data: { rulesJson: JSON.stringify(rules) },
+          })
+        }
+      }
+
+      for (const rule of rules) {
+        const key = rule.shortName || rule.description
+        if (seen.has(key)) continue
+        seen.add(key)
+        lines.push(`- ${rule.shortName || 'Rule'}: ${rule.description}`)
+      }
+    }
+
+    // Cap so the prompt stays focused on the most relevant rules.
+    return lines.slice(0, 10).join('\n')
+  } catch (err) {
+    console.error(`🔴 gatherSubredditRules failed for project ${projectId}:`, err)
+    return ''
+  }
+}
+
 async function generateOneDraft(opts: {
   projectId: string
   project: { name: string; description: string; targetAudience: string | null; keywords: string[] }
@@ -84,6 +145,7 @@ async function generateOneDraft(opts: {
   contentType: 'article' | 'social'
   tone: string
   angle: string
+  rulesText?: string
 }): Promise<void> {
   const { system, prompt } = buildPrompt(opts)
 
@@ -206,26 +268,42 @@ export async function generateDailyContentForProject(projectId: string): Promise
         .replaceAll('{topic}', project.keywords[0] || project.name)
         .replaceAll('{audience}', project.targetAudience || 'your audience')
 
-    for (const item of batch) {
-      await generateOneDraft({
-        projectId: project.id,
-        project,
-        authorName: author?.name ?? null,
-        provider,
-        apiKey,
-        contentType: item.contentType,
-        tone: item.tone,
-        angle: angleParams(item.angle),
-      })
-    }
+    // Best-effort community rules so generated content complies with the
+    // monitored subreddits. Never blocks generation - failures return [].
+    const rulesText = await gatherSubredditRules(project.id)
+
+    // Generate each draft independently so a single AI failure doesn't sink
+    // the whole batch (Promise.allSettled never rejects).
+    const results = await Promise.allSettled(
+      batch.map((item) =>
+        generateOneDraft({
+          projectId: project.id,
+          project,
+          authorName: author?.name ?? null,
+          provider,
+          apiKey,
+          contentType: item.contentType,
+          tone: item.tone,
+          angle: angleParams(item.angle),
+          rulesText,
+        }),
+      ),
+    )
+
+    const succeeded = results.filter((r) => r.status === 'fulfilled').length
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        console.error(`🔴 generateDailyContentForProject: draft ${i + 1}/${batch.length} failed for ${project.id}:`, r.reason)
+      }
+    })
 
     await prisma.project.update({
       where: { id: project.id },
       data: { lastContentGeneratedAt: new Date() },
     })
 
-    console.log(`🟢 generateDailyContentForProject: generated ${batch.length} items for ${project.id} (${project.name})`)
-    return { projectId, generated: batch.length, skipped: false }
+    console.log(`🟢 generateDailyContentForProject: generated ${succeeded}/${batch.length} items for ${project.id} (${project.name})`)
+    return { projectId, generated: succeeded, skipped: false }
   } finally {
     await prisma.project.update({
       where: { id: project.id },

@@ -496,37 +496,54 @@ function Home() {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const logosRef = useRef<HTMLSpanElement>(null)
   const redditRef = useRef<HTMLSpanElement>(null)
+  const gradLine1Ref = useRef<HTMLSpanElement>(null)
+  const gradLine2Ref = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    const title = titleRef.current
-    const logos = logosRef.current
+const logos = logosRef.current
     const reddit = redditRef.current
-    if (!title || !logos || !reddit) return
+    const gradLine1 = gradLine1Ref.current
+    const gradLine2 = gradLine2Ref.current
+    if (!logos || !reddit || !gradLine1 || !gradLine2) return
 
     let raf = 0
     let startTime = 0
     const startDelay = 0
-    const duration = 2400
-    let logosFrac = 0.45
-    let redditFrac = 0.9
+    const duration = 4000
+    let logosFrac = 0.35
+    let redditFrac = 0.85
+    let line1Share = 0.55
+
+    const applySweeps = (p: number) => {
+      // Reading order: line 1 sweeps first (0 -> line1Share), then line 2.
+      const line1Sweep = Math.min(1, p / line1Share)
+      const line2Sweep = Math.min(1, Math.max(0, (p - line1Share) / (1 - line1Share)))
+      gradLine1.style.setProperty('--sweep-1', `${(line1Sweep * 100).toFixed(2)}%`)
+      gradLine2.style.setProperty('--sweep-2', `${(line2Sweep * 100).toFixed(2)}%`)
+      return { line1Sweep, line2Sweep }
+    }
 
     const tick = (now: number) => {
       if (!startTime) startTime = now
       const t = Math.min(1, (now - startTime) / duration)
       const p = 1 - Math.pow(1 - t, 2)
-      title.style.setProperty('--sweep', `${(p * 100).toFixed(2)}%`)
-      if (p >= logosFrac) setLogosDropped(true)
-      if (p >= redditFrac) setRedditDropped(true)
+      const { line1Sweep, line2Sweep } = applySweeps(p)
+      if (line1Sweep >= logosFrac) setLogosDropped(true)
+      if (line2Sweep >= redditFrac) setRedditDropped(true)
       if (t < 1) raf = requestAnimationFrame(tick)
     }
 
     const timer = setTimeout(() => {
-      const titleRect = title.getBoundingClientRect()
-      if (titleRect.width > 0) {
+      const gradLine1Rect = gradLine1.getBoundingClientRect()
+      const gradLine2Rect = gradLine2.getBoundingClientRect()
+      if (gradLine1Rect.width > 0 && gradLine2Rect.width > 0) {
         const logosRect = logos.getBoundingClientRect()
         const redditRect = reddit.getBoundingClientRect()
-        logosFrac = Math.min(1, Math.max(0, (logosRect.left - titleRect.left) / titleRect.width))
-        redditFrac = Math.min(1, Math.max(0, (redditRect.left - titleRect.left) / titleRect.width))
+        logosFrac = Math.min(1, Math.max(0, (logosRect.left - gradLine1Rect.left) / gradLine1Rect.width))
+        redditFrac = Math.min(1, Math.max(0, (redditRect.left - gradLine2Rect.left) / gradLine2Rect.width))
+        const l1 = gradLine1Rect.width
+        const l2 = gradLine2Rect.width
+        line1Share = l1 + l2 > 0 ? l1 / (l1 + l2) : 0.55
       }
       raf = requestAnimationFrame(tick)
     }, startDelay)
@@ -708,19 +725,22 @@ function Home() {
               </span>
             </span>
 
-            {/* Layer 2: gradient overlay, revealed by the sweep */}
+            {/* Layer 2: gradient overlay, revealed by the sweep (per-line, reading order) */}
             <span
               aria-hidden
               className="pointer-events-none absolute inset-0 flex flex-col items-center"
-              style={{
-                ...TITLE_GRADIENT,
-                maskImage:
-                  'linear-gradient(to right, black 0%, black var(--sweep, 0%), transparent var(--sweep, 0%), transparent 100%)',
-                WebkitMaskImage:
-                  'linear-gradient(to right, black 0%, black var(--sweep, 0%), transparent var(--sweep, 0%), transparent 100%)',
-              }}
             >
-              <span className="flex items-center gap-[0.35em]">
+              <span
+                ref={gradLine1Ref}
+                className="flex items-center gap-[0.35em]"
+                style={{
+                  ...TITLE_GRADIENT,
+                  maskImage:
+                    'linear-gradient(to right, black 0%, black var(--sweep-1, 0%), transparent var(--sweep-1, 0%), transparent 100%)',
+                  WebkitMaskImage:
+                    'linear-gradient(to right, black 0%, black var(--sweep-1, 0%), transparent var(--sweep-1, 0%), transparent 100%)',
+                }}
+              >
                 Show up in
                 <span className="flex items-center">
                   {AI_LOGOS.map((logo) => (
@@ -733,7 +753,17 @@ function Home() {
                 </span>
                 answers
               </span>
-              <span className="flex items-center gap-[0.35em]">
+              <span
+                ref={gradLine2Ref}
+                className="flex items-center gap-[0.35em]"
+                style={{
+                  ...TITLE_GRADIENT,
+                  maskImage:
+                    'linear-gradient(to right, black 0%, black var(--sweep-2, 0%), transparent var(--sweep-2, 0%), transparent 100%)',
+                  WebkitMaskImage:
+                    'linear-gradient(to right, black 0%, black var(--sweep-2, 0%), transparent var(--sweep-2, 0%), transparent 100%)',
+                }}
+              >
                 by being the answer on
                 <span className="block h-[0.9em] w-[0.9em] shrink-0" aria-hidden />
               </span>
@@ -870,6 +900,12 @@ function Home() {
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes logo-drop {
+          0% { opacity: 0; transform: translateY(-90px) scale(0.7); }
+          60% { opacity: 1; transform: translateY(10px) scale(1.05); }
+          80% { transform: translateY(-4px) scale(0.99); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes logo-pop {
           0% { opacity: 0; transform: translateY(-90px) scale(0.7); }
           60% { opacity: 1; transform: translateY(10px) scale(1.05); }
           80% { transform: translateY(-4px) scale(0.99); }

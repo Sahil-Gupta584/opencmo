@@ -100,7 +100,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </div>
 
         {/* Fetch Button */}
-        {/* <div className="flex items-center gap-3">
+         <div className="flex items-center gap-3">
           <Button
             color="primary"
             startContent={<RiRefreshLine />}
@@ -111,7 +111,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
           >
             {fetchInboundsMutation.isPending ? 'Fetching...' : 'Fetch Now'}
           </Button>
-        </div> */}
+        </div> 
       </div>
 
       {/* ── Fetching Banner ─────────────────────────────────────────────── */}

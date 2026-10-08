@@ -3,7 +3,6 @@ import { Spinner } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
 import { useEffect } from 'react'
-import { getActiveProjectId, setActiveProjectId } from '#/lib/active-project'
 
 export const Route = createFileRoute('/_protected/dashboard/')({
   component: DashboardIndexPage,
@@ -25,16 +24,12 @@ function DashboardIndexPage() {
       return
     }
 
-    const cachedId = getActiveProjectId()
-    const validProject = projects.find((p) => p.id === cachedId)
-
-    if (validProject) {
-      void navigate({ to: '/dashboard/inbounds', replace: true })
-    } else {
-      const fallbackId = projects[0].id
-      setActiveProjectId(fallbackId)
-      void navigate({ to: '/dashboard/inbounds', replace: true })
-    }
+    // No projectId in the URL yet, so default the user to their first project.
+    void navigate({
+      to: '/dashboard/inbounds',
+      search: { projectId: projects[0].id },
+      replace: true,
+    })
   }, [isLoading, projects, navigate])
 
   return (

@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { MentionsBoard } from '#/components/dashboard/MentionsBoard'
-import { getActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 
 export const Route = createFileRoute('/_protected/dashboard/mentions')({
+  validateSearch: validateProjectSearch,
   component: MentionsPage,
 })
 
 function MentionsPage() {
-  return <MentionsBoard activeProjectId={getActiveProjectId() || ''} />
+  const { projectId } = Route.useSearch()
+  return <MentionsBoard activeProjectId={projectId ?? ''} />
 }

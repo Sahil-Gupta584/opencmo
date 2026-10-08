@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { setActiveProjectId } from '#/lib/active-project'
+
 import {
   RiSparklingFill,
   RiAddLine,
@@ -189,9 +189,11 @@ function NewProductPage() {
   const createMutation = useMutation(
     orpc.createProject.mutationOptions({
       onSuccess: (createdProject) => {
-        setActiveProjectId(createdProject.id)
         queryClient.invalidateQueries()
-        void navigate({ to: '/dashboard/inbounds' })
+        void navigate({
+          to: '/dashboard/inbounds',
+          search: { projectId: createdProject.id },
+        })
       },
       onError: (err) => {
         const msg = err instanceof Error ? err.message : 'Failed to save your project. Please try again.'

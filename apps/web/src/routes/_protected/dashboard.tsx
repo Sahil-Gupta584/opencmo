@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router'
 import {
   Spinner,
   Dropdown,
@@ -12,7 +12,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
 import { authClient } from '#/lib/auth-client'
-import { getActiveProjectId, setActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 import { Brand } from '#/components/Brand'
 import {
   RiInboxLine,
@@ -33,6 +33,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { ShortcutKey } from '#/components/ShortcutKey'
 
 export const Route = createFileRoute('/_protected/dashboard')({
+  validateSearch: validateProjectSearch,
   component: DashboardLayout,
 })
 
@@ -70,6 +71,15 @@ function ProductLogo({ url, name, size = 'sm' }: { url?: string; name?: string; 
 }
 
 
+const NAV_ITEMS = [
+  { label: 'Inbounds', to: '/dashboard/inbounds', icon: RiInboxLine },
+  { label: 'Outbound', to: '/dashboard/outbound', icon: RiSendPlaneLine },
+  { label: 'Subreddits', to: '/dashboard/subreddits', icon: RiRedditLine },
+  { label: 'Mentions', to: '/dashboard/mentions', icon: RiBellLine },
+  { label: 'Alerts', to: '/dashboard/alerts', icon: RiNotification3Line },
+  { label: 'Settings', to: '/dashboard/settings', icon: RiSettingsLine },
+] as const
+
 function FeedbackTooltipButton() {
   const [show, setShow] = useState(false)
 
@@ -104,77 +114,30 @@ function FeedbackTooltipButton() {
   )
 }
 
-function DashboardLayout() {
-  const navigate = useNavigate()
-  const { user } = Route.useRouteContext()
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(getActiveProjectId())
+interface SidebarProps {
+  projects: Array<{ id: string; name: string; url?: string | null }>
+  activeProject?: { id: string; name: string; url?: string | null }
+  pathname: string
+  isPro: boolean
+  onSelectProject: (projectId: string) => void
+  onAddProduct: () => void
+  onNavigate: () => void
+}
 
-  // Fetch all user projects
-  const { data: projects = [], isLoading } = useQuery({
-    ...orpc.listProjects.queryOptions(),
-    staleTime: 0,
-  })
+function DashboardSidebar({
+  projects,
+  activeProject,
+  pathname,
+  isPro,
+  onSelectProject,
+  onAddProduct,
+  onNavigate,
+}: SidebarProps) {
+  const currentProjectId = activeProject?.id
+  const projectSearch = (projectId?: string) =>
+    projectId ? ({ projectId } as const) : undefined
 
-  // Validate or set active project ID
-  useEffect(() => {
-    if (isLoading) return
-
-    if (projects.length === 0) {
-      if (!pathname.endsWith('/new')) {
-        void navigate({ to: '/new', replace: true })
-      }
-      return
-    }
-
-    const currentCachedId = getActiveProjectId()
-    const validProject = projects.find((p) => p.id === currentCachedId)
-
-    if (validProject) {
-      setSelectedProjectId(validProject.id)
-    } else {
-      // If 404 or missing, set to first project
-      const fallbackId = projects[0].id
-      setActiveProjectId(fallbackId)
-      setSelectedProjectId(fallbackId)
-    }
-  }, [isLoading, projects, pathname, navigate])
-
-  const activeProject = useMemo(() => {
-    return projects.find((p) => p.id === selectedProjectId) ?? projects[0]
-  }, [projects, selectedProjectId])
-
-  const handleSelectProject = (projectId: string) => {
-    setActiveProjectId(projectId)
-    setSelectedProjectId(projectId)
-  }
-
-  const NAV_ITEMS = [
-    { label: 'Inbounds', to: '/dashboard/inbounds', icon: RiInboxLine },
-    { label: 'Outbound', to: '/dashboard/outbound', icon: RiSendPlaneLine },
-    { label: 'Subreddits', to: '/dashboard/subreddits', icon: RiRedditLine },
-    { label: 'Mentions', to: '/dashboard/mentions', icon: RiBellLine },
-    { label: 'Alerts', to: '/dashboard/alerts', icon: RiNotification3Line },
-    { label: 'Settings', to: '/dashboard/settings', icon: RiSettingsLine },
-  ] as const
-
-  const handleSignOut = async () => {
-    await authClient.signOut()
-    void navigate({ to: '/login', search: {} })
-  }
-
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
-    : (user?.email?.[0] ?? 'U').toUpperCase()
-
-  const displayName = user?.name ?? user?.email ?? 'User'
-
-  // Get current active tab name for top bar breadcrumb
-  const currentNav = NAV_ITEMS.find((item) => pathname.includes(item.label.toLowerCase()))
-  const pageTitle = pathname.endsWith('/new') ? 'Add New Product' : currentNav ? currentNav.label : 'Dashboard'
-
-  const SidebarContent = () => (
+  return (
     <div className="flex h-full flex-col bg-card border-r border-line shadow-[0_0_0_1px_rgba(255,255,255,0.5)]">
       {/* 1. App Brand Logo (Very Top Left) */}
       <div className="flex h-[56px] items-center px-4">
@@ -203,7 +166,7 @@ function DashboardLayout() {
               {projects.map((p) => (
                 <DropdownItem
                   key={p.id}
-                  onPress={() => handleSelectProject(p.id)}
+                  onPress={() => onSelectProject(p.id)}
                   startContent={<ProductLogo url={p.url ?? undefined} name={p.name} size="sm" />}
                   className={p.id === activeProject?.id ? 'bg-coral/10 text-coral-dark font-semibold' : ''}
                 >
@@ -214,7 +177,7 @@ function DashboardLayout() {
             <DropdownSection>
               <DropdownItem
                 key="add-new"
-                onPress={() => void navigate({ to: '/new' })}
+                onPress={onAddProduct}
                 startContent={<RiAddLine className="text-coral text-base" />}
                 className="text-coral font-semibold"
               >
@@ -233,7 +196,8 @@ function DashboardLayout() {
             <Link
               key={to}
               to={to}
-              onClick={() => setMobileOpen(false)}
+              search={projectSearch(currentProjectId)}
+              onClick={onNavigate}
               className={[
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 no-underline',
                 isActive
@@ -259,12 +223,94 @@ function DashboardLayout() {
             startContent={<RiFlashlightLine className="text-sm" />}
             className="font-semibold text-xs justify-start"
           >
-            {user?.plan === 'PRO' ? 'Pro Plan Active' : 'Upgrade Plan'}
+            {isPro ? 'Pro Plan Active' : 'Upgrade Plan'}
           </Button>
         </Link>
       </div>
     </div>
   )
+}
+
+function DashboardLayout() {
+  const navigate = Route.useNavigate()
+  const { user } = Route.useRouteContext()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // The active project is a URL search param, so it survives reloads and is
+  // shareable. Children read it via their own Route.useSearch().
+  const { projectId } = Route.useSearch()
+
+  // Fetch all user projects
+  const { data: projects = [], isLoading } = useQuery({
+    ...orpc.listProjects.queryOptions(),
+    staleTime: 0,
+  })
+
+  // If the URL has no projectId, or points at a project that no longer exists
+  // (deleted, or another account), fall back to the first project.
+  useEffect(() => {
+    if (isLoading) return
+
+    if (projects.length === 0) {
+      if (!pathname.endsWith('/new')) {
+        void navigate({ to: '/new', replace: true })
+      }
+      return
+    }
+
+    const isValid = projectId !== undefined && projects.some((p) => p.id === projectId)
+    if (isValid) return
+
+    // /new has no projectId param, so don't redirect away from it.
+    if (pathname.endsWith('/new')) return
+
+    void navigate({
+      search: { projectId: projects[0].id },
+      replace: true,
+    })
+  }, [isLoading, projects, projectId, pathname, navigate])
+
+  // Always resolve to a project that exists so no page queries a stale id.
+  const activeProject = useMemo(() => {
+    return projects.find((p) => p.id === projectId) ?? projects[0]
+  }, [projects, projectId])
+
+  const handleSelectProject = (nextProjectId: string) => {
+    void navigate({
+      search: { projectId: nextProjectId },
+    })
+  }
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    void navigate({ to: '/login', search: {} })
+  }
+
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n: string) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : (user?.email?.[0] ?? 'U').toUpperCase()
+
+  const displayName = user?.name ?? user?.email ?? 'User'
+
+  // Get current active tab name for top bar breadcrumb
+  const currentNav = NAV_ITEMS.find((item) => pathname.includes(item.label.toLowerCase()))
+  const pageTitle = pathname.endsWith('/new') ? 'Add New Product' : currentNav ? currentNav.label : 'Dashboard'
+
+  const sidebarProps = {
+    projects,
+    activeProject,
+    pathname,
+    isPro: user?.plan === 'PRO',
+    onSelectProject: handleSelectProject,
+    onAddProduct: () => void navigate({ to: '/new' }),
+    onNavigate: () => setMobileOpen(false),
+  }
 
   if (isLoading) {
     return (
@@ -278,7 +324,7 @@ function DashboardLayout() {
     <div className="flex h-screen overflow-hidden bg-sand">
       {/* ── Desktop sidebar (Full height 100vh from top:0) ─────────────────── */}
       <aside className="hidden md:flex w-[230px] shrink-0 flex-col h-full z-20">
-        <SidebarContent />
+        <DashboardSidebar {...sidebarProps} />
       </aside>
 
       {/* ── Mobile sidebar overlay ────────────────────────────────────────── */}
@@ -286,7 +332,7 @@ function DashboardLayout() {
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 h-full w-[230px] z-50">
-            <SidebarContent />
+            <DashboardSidebar {...sidebarProps} />
           </aside>
         </div>
       )}
@@ -348,7 +394,7 @@ function DashboardLayout() {
                   <DropdownItem
                     key="settings"
                     startContent={<RiSettingsLine className="text-base text-muted" />}
-                    onPress={() => void navigate({ to: '/settings' })}
+                    onPress={() => void navigate({ to: '/settings', search: { tab: undefined } })}
                   >
                     Settings
                   </DropdownItem>

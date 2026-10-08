@@ -30,23 +30,27 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
     ...orpc.listProjects.queryOptions(),
     refetchInterval: 4000,
   })
-  const activeProject = projects.find((p) => p.id === activeProjectId)
+
+  // Fall back to the first project if the URL points at a deleted/unknown id,
+  // so we never query data for a project that doesn't exist.
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0]
+  const resolvedProjectId = activeProject?.id ?? ''
   const isFetching = Boolean(activeProject?.isFetching)
 
   // Fetch threads for active project
   const { data: threads = [], isLoading: loadingThreads } = useQuery({
     ...orpc.listThreads.queryOptions({
-      input: { projectId: activeProjectId, isDone: activeTab === 'completed', channel: selectedChannel },
+      input: { projectId: resolvedProjectId, isDone: activeTab === 'completed', channel: selectedChannel },
     }),
-    enabled: !!activeProjectId,
+    enabled: !!resolvedProjectId,
   })
 
   // Per-channel counts for the filter pills
   const { data: threadCounts } = useQuery({
     ...orpc.listThreadCounts.queryOptions({
-      input: { projectId: activeProjectId },
+      input: { projectId: resolvedProjectId },
     }),
-    enabled: !!activeProjectId,
+    enabled: !!resolvedProjectId,
   })
 
   // Mutations
@@ -105,13 +109,13 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
             color="primary"
             startContent={<RiRefreshLine />}
             isLoading={fetchInboundsMutation.isPending}
-            onPress={() => activeProjectId && fetchInboundsMutation.mutate({ projectId: activeProjectId })}
+            onPress={() => resolvedProjectId && fetchInboundsMutation.mutate({ projectId: resolvedProjectId })}
             className="font-medium"
-            isDisabled={!activeProjectId}
+            isDisabled={!resolvedProjectId}
           >
             {fetchInboundsMutation.isPending ? 'Fetching...' : 'Fetch Now'}
           </Button>
-        </div> 
+        </div>
       </div>
 
       {/* ── Fetching Banner ─────────────────────────────────────────────── */}

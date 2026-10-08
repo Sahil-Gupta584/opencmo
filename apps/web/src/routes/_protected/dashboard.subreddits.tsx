@@ -3,17 +3,18 @@ import { Button, Card, CardBody, Chip, Spinner } from '@heroui/react'
 import { Input } from '#/components/Input'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
-import { getActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 import { useState } from 'react'
 import { RiRefreshLine, RiShieldCheckLine, RiExternalLinkLine, RiSearchLine, RiAddLine, RiDeleteBinLine } from 'react-icons/ri'
 
 export const Route = createFileRoute('/_protected/dashboard/subreddits')({
+  validateSearch: validateProjectSearch,
   component: SubredditsPage,
 })
 
 function SubredditsPage() {
   const queryClient = useQueryClient()
-  const activeProjectId = getActiveProjectId() || ''
+  const { projectId } = Route.useSearch()
   const [newSubreddit, setNewSubreddit] = useState<string>('')
   const [addError, setAddError] = useState<string | null>(null)
 
@@ -22,7 +23,8 @@ function SubredditsPage() {
     staleTime: 0,
   })
 
-  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0]
+  const activeProject = projects.find((p) => p.id === projectId) || projects[0]
+  const activeProjectId = activeProject?.id ?? ''
 
   const refreshSubredditsMutation = useMutation(
     orpc.refreshSubreddits.mutationOptions({

@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { InboundsFeed } from '#/components/dashboard/InboundsFeed'
-import { getActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 
 export const Route = createFileRoute('/_protected/dashboard/inbounds')({
+  validateSearch: validateProjectSearch,
   component: InboundsPage,
 })
 
 function InboundsPage() {
-  return <InboundsFeed activeProjectId={getActiveProjectId() || ''} />
+  const { projectId } = Route.useSearch()
+  return <InboundsFeed activeProjectId={projectId ?? ''} />
 }

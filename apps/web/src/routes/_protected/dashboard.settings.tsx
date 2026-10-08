@@ -4,7 +4,7 @@ import { Input } from '#/components/Input'
 import { Textarea } from '#/components/Textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
-import { getActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { RiKeyLine, RiCheckLine, RiBankCardLine, RiLock2Line, RiSettingsLine } from 'react-icons/ri'
 
 export const Route = createFileRoute('/_protected/dashboard/settings')({
+  validateSearch: validateProjectSearch,
   component: DashboardSettingsPage,
 })
 
@@ -43,14 +44,14 @@ type ProjectForm = z.infer<typeof projectSchema>
 function DashboardSettingsPage() {
   const queryClient = useQueryClient()
   const [saveSuccess, setSaveSuccess] = useState(false)
-  const activeProjectId = getActiveProjectId() || ''
+  const { projectId } = Route.useSearch()
 
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     ...orpc.listProjects.queryOptions(),
     staleTime: 0,
   })
 
-  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0]
+  const activeProject = projects.find((p) => p.id === projectId) || projects[0]
 
   const {
     register: registerProject,

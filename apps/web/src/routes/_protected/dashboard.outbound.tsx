@@ -3,10 +3,11 @@ import { Card, CardBody, Chip, Spinner, Tabs, Tab } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
 import { useState } from 'react'
-import { getActiveProjectId } from '#/lib/active-project'
+import { validateProjectSearch } from '#/lib/project-search'
 import { RiFileCopyLine, RiCheckLine, RiLoader4Line, RiArticleLine, RiHashtag } from 'react-icons/ri'
 
 export const Route = createFileRoute('/_protected/dashboard/outbound')({
+  validateSearch: validateProjectSearch,
   component: OutboundPage,
 })
 
@@ -17,7 +18,7 @@ function formatDayLabel(date: Date, todayStart: Date, yesterdayStart: Date): str
 }
 
 function OutboundPage() {
-  const activeProjectId = getActiveProjectId() || ''
+  const { projectId } = Route.useSearch()
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [typeFilter, setTypeFilter] = useState<'SOCIAL' | 'ARTICLE'>('SOCIAL')
 
@@ -28,7 +29,7 @@ function OutboundPage() {
     staleTime: 0,
   })
 
-  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0]
+  const activeProject = projects.find((p) => p.id === projectId) || projects[0]
   const isGenerating = !!activeProject?.isGeneratingContent
   const drafts = activeProject?.drafts || []
 

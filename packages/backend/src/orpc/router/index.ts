@@ -7,8 +7,10 @@ import { getMentionsInterest, saveMentionsInterest, getAlertPref, saveAlertPref 
 import { createCheckout, getSubscription } from './billing'
 import { runFetchCycle, runDailyContentCycle } from './cron'
 import { listProjects as demoListProjects, testDb } from './demo'
+import { logPublicPayload } from './log'
 
 export default {
+  logPublicPayload,
   listTodos,
   addTodo,
   getApiConfig,

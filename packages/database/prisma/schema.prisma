@@ -141,8 +141,6 @@ model ProjectSubreddit {
   @@map("project_subreddit")
 }
 
-
-
 model RedditThread {
   id             String       @id @default(cuid())
   redditId       String       // Unique post ID (Reddit ID, Tweet ID, LinkedIn ID)
@@ -163,12 +161,14 @@ model RedditThread {
   intentReason  String?      @db.Text
 
   isDone         Boolean      @default(false)
+  isDismissed    Boolean      @default(false)
+  dismissedAt    DateTime?
   generatedReply String?      @db.Text
 
   fetchedAt      DateTime     @default(now())
 
   @@unique([projectId, redditId])
-  @@index([projectId, channel, isDone, redditCreatedAt])
+  @@index([projectId, channel, isDone, isDismissed, redditCreatedAt])
   @@map("reddit_thread")
 }
 
@@ -221,23 +221,13 @@ model FeatureInterest {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   feature    String   // e.g. "mentions"
   interested Boolean
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([userId, feature])
-  @@map("feature_interest")
 }
 
 model AlertPref {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  emailEnabled   Boolean  @default(true)
-  notifyInbounds Boolean  @default(true)
-  notifyOutbound Boolean  @default(true)
-  channels       String[] // requested channels: whatsapp, slack, discord, or custom
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@map("alert_pref")
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     Boolean @default(true)
+  slack     Boolean @default(false)
+  discord   Boolean @default(false)
 }

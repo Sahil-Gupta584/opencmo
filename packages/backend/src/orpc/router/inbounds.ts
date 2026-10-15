@@ -105,6 +105,7 @@ export const listThreads = authed.input(ListThreadsSchema).handler(async ({ inpu
     where: {
       projectId: input.projectId,
       ...(input.isDone !== undefined ? { isDone: input.isDone } : {}),
+      ...(input.isDismissed !== undefined ? { isDismissed: input.isDismissed } : {}),
       ...(input.channel && input.channel !== 'all' ? { channel: input.channel } : {}),
     },
     orderBy: { redditCreatedAt: 'desc' },
@@ -161,7 +162,11 @@ export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler
 
   return prisma.redditThread.update({
     where: { id: input.threadId },
-    data: { isDone: input.isDone },
+    data: {
+      isDone: input.isDone ?? thread.isDone,
+      isDismissed: input.isDismissed ?? thread.isDismissed,
+      dismissedAt: input.isDismissed ? new Date() : null,
+    },
   })
 })
 
@@ -182,6 +187,7 @@ export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handl
       id: { in: input.threadIds },
       channel: input.channel,
       isDone: false,
+      isDismissed: false,
     },
     data: { isDone: true },
   })
@@ -208,29 +214,20 @@ export const generateThreadReply = authed.input(GenerateThreadReplySchema).handl
 
   const { provider, apiKey } = getAiCredentials(apiConfig)
 
-  const channelName = thread.channel === 'twitter' ? 'X (Twitter)' : thread.channel === 'linkedin' ? 'LinkedIn' : 'Reddit'
+  const channelName = thread.channel
+  const rulesPrompt = await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
 
-  const rulesPrompt = thread.channel === 'reddit'
-    ? await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
-    : ''
+  const prompt = `You are an expert at engaging in ${channelName} communities.
+  Your goal is to write a helpful, non-salesy reply to the following thread.
+  
+  Thread Title: ${thread.title}
+  Thread Body: ${thread.body ?? ''}
+  
+  ${rulesPrompt}
+  
+  Write a reply that adds value to the conversation. Keep it concise.`
 
-  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.${rulesPrompt}`
-
-  const prompt = `Platform: ${channelName}
-Thread Title: ${thread.title}
-Community/Channel: ${thread.subreddit}
-Content/Body: ${thread.body || thread.title}
-
-My Product: ${thread.project.name}
-Description: ${thread.project.description}
-Target Audience: ${thread.project.targetAudience}
-
-Write a helpful ${channelName} reply. Keep it concise.
-Shouldnt sound like a ai generated, keep it short straight to the point. reply in a way that user might reply back, but make sure you dont ask question unnecessarily.
-`
-
-
-  const reply = await callAI({ provider, apiKey, prompt, system })
+  const reply = await callAI(provider, apiKey, prompt)
 
   return prisma.redditThread.update({
     where: { id: input.threadId },

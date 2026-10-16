@@ -120,6 +120,8 @@ export default heroui({
         background: "#1C1513",
         foreground: "#FAF6F4",
         divider: "#3F332F",
+        focus: "#FF6F59",
+        overlay: "#1C1513",
         content1: "#241C1A",
         content2: "#2E2422",
         content3: "#3F332F",

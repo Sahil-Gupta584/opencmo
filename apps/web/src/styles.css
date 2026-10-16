@@ -4,20 +4,57 @@
 @source '../../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 
 @theme {
-  --color-surface: #fffaf7;
-  --color-card: #fffcfc;
-  --color-ink: #332a28;
-  --color-muted: #796b66;
-  --color-faint: #aa9690;
-  --color-line: #f2e8e3;
-  --color-line-strong: #e9d4cd;
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-coral: #ff6f59;
   --color-coral-dark: #f55d47;
-  --color-sand: #f5efec;
+  --color-sand: var(--sand);
 
-  --shadow-soft: 0 1px 2px rgb(51 42 40 / 0.04), 0 4px 10px -2px rgb(51 42 40 / 0.05), 0 12px 24px -6px rgb(51 42 40 / 0.06);
-  --shadow-lift: 0 2px 5px rgb(51 42 40 / 0.05), 0 10px 20px -4px rgb(51 42 40 / 0.08), 0 28px 56px -12px rgb(51 42 40 / 0.12);
+  --shadow-soft: var(--shadow-soft-val);
+  --shadow-lift: var(--shadow-lift-val);
   --shadow-glow: 0 0 0 1px rgb(255 111 89 / 0.16), 0 8px 24px -6px rgb(255 111 89 / 0.28);
+}
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --surface: #fffaf7;
+  --card: #fffcfc;
+  --ink: #332a28;
+  --muted: #796b66;
+  --faint: #aa9690;
+  --line: #f2e8e3;
+  --line-strong: #e9d4cd;
+  --sand: #f5efec;
+  --shadow-soft-val: 0 1px 2px rgb(51 42 40 / 0.04), 0 4px 10px -2px rgb(51 42 40 / 0.05), 0 12px 24px -6px rgb(51 42 40 / 0.06);
+  --shadow-lift-val: 0 2px 5px rgb(51 42 40 / 0.05), 0 10px 20px -4px rgb(51 42 40 / 0.08), 0 28px 56px -12px rgb(51 42 40 / 0.12);
+  --card-bg-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 252, 252, 0.6));
+  --card-border-color: rgba(51, 42, 40, 0.08);
+  --card-border-hover: rgba(51, 42, 40, 0.14);
+  --card-inset-highlight: rgba(255, 255, 255, 0.9);
+  --control-border: rgba(51, 42, 40, 0.06);
+}
+
+.dark {
+  --surface: #1c1513;
+  --card: #241c1a;
+  --ink: #faf6f4;
+  --muted: #b39a92;
+  --faint: #967d74;
+  --line: #3f332f;
+  --line-strong: #5c4b46;
+  --sand: #241c1a;
+  --shadow-soft-val: 0 1px 2px rgb(0 0 0 / 0.2), 0 4px 10px -2px rgb(0 0 0 / 0.3), 0 12px 24px -6px rgb(0 0 0 / 0.4);
+  --shadow-lift-val: 0 2px 5px rgb(0 0 0 / 0.3), 0 10px 20px -4px rgb(0 0 0 / 0.4), 0 28px 56px -12px rgb(0 0 0 / 0.6);
+  --card-bg-gradient: linear-gradient(180deg, rgba(36, 28, 26, 0.9), rgba(30, 23, 21, 0.8));
+  --card-border-color: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 255, 255, 0.16);
+  --card-inset-highlight: rgba(255, 255, 255, 0.05);
+  --control-border: rgba(255, 255, 255, 0.1);
 }
 
 @font-face {
@@ -26,10 +63,6 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-}
-
-:root {
-  --font-sans: 'Plus Jakarta Sans', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -50,17 +83,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Premium surface: hairline light outline + top inner highlight + layered soft shadow */
+/* Premium surface: hairline outline + top inner highlight + layered soft shadow */
 @layer components {
   .card-surface {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 252, 252, 0.6));
-    border: 1px solid rgba(51, 42, 40, 0.08);
+    background: var(--card-bg-gradient);
+    border: 1px solid var(--card-border-color);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-      0 1px 2px rgb(51 42 40 / 0.04),
-      0 4px 10px -2px rgb(51 42 40 / 0.05),
-      0 12px 24px -6px rgb(51 42 40 / 0.06);
+      inset 0 1px 0 var(--card-inset-highlight),
+      inset 0 0 0 1px var(--card-inset-highlight),
+      var(--shadow-soft);
     border-radius: 1rem;
   }
 
@@ -72,27 +103,25 @@ body {
   }
   .card-surface-hover:hover {
     transform: translateY(-2px);
-    border-color: rgba(51, 42, 40, 0.14);
+    border-color: var(--card-border-hover);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-      0 2px 5px rgb(51 42 40 / 0.05),
-      0 10px 20px -4px rgb(51 42 40 / 0.08),
-      0 28px 56px -12px rgb(51 42 40 / 0.12);
+      inset 0 1px 0 var(--card-inset-highlight),
+      inset 0 0 0 1px var(--card-inset-highlight),
+      var(--shadow-lift);
   }
 
-  /* Hairline light outline for inputs & controls */
+  /* Hairline outline for inputs & controls */
   .control-outline {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 0 0 1px rgba(51, 42, 40, 0.06);
+      inset 0 1px 0 var(--card-inset-highlight),
+      0 0 0 1px var(--control-border);
     transition:
       box-shadow 0.2s ease,
       border-color 0.2s ease;
   }
   .control-outline:focus-within {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 1px 0 var(--card-inset-highlight),
       0 0 0 1px rgba(255, 111, 89, 0.4),
       0 4px 12px -4px rgba(255, 111, 89, 0.25);
   }
@@ -122,4 +151,3 @@ body {
 .nav-link:hover::after {
   transform: scaleX(1);
 }
-

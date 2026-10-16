@@ -9,6 +9,7 @@ import {
   ListThreadsSchema,
   ListThreadCountsSchema,
   UpdateThreadStatusSchema,
+  DismissThreadSchema,
   MarkThreadsCompleteSchema,
   GenerateThreadReplySchema,
 } from '../schema.js'
@@ -105,6 +106,7 @@ export const listThreads = authed.input(ListThreadsSchema).handler(async ({ inpu
     where: {
       projectId: input.projectId,
       ...(input.isDone !== undefined ? { isDone: input.isDone } : {}),
+      ...(input.isDismissed !== undefined ? { isDismissed: input.isDismissed } : {}),
       ...(input.channel && input.channel !== 'all' ? { channel: input.channel } : {}),
     },
     orderBy: { redditCreatedAt: 'desc' },
@@ -130,21 +132,26 @@ export const listThreadCounts = authed.input(ListThreadCountsSchema).handler(asy
   }
 
   const grouped = await prisma.redditThread.groupBy({
-    by: ['channel'],
+    by: ['channel', 'isDone', 'isDismissed'],
     where: { projectId: input.projectId },
     _count: { _all: true },
   })
 
-  const counts: Record<string, number> = {}
-  for (const g of grouped) {
-    counts[g.channel] = g._count._all
+  const counts: Record<string, { open: number; completed: number; dismissed: number }> = {
+    reddit: { open: 0, completed: 0, dismissed: 0 },
+    twitter: { open: 0, completed: 0, dismissed: 0 },
+    linkedin: { open: 0, completed: 0, dismissed: 0 },
   }
 
-  return {
-    reddit: counts.reddit ?? 0,
-    twitter: counts.twitter ?? 0,
-    linkedin: counts.linkedin ?? 0,
+  for (const g of grouped) {
+    const channel = g.channel as 'reddit' | 'twitter' | 'linkedin'
+    if (!counts[channel]) continue
+    if (g.isDismissed) counts[channel].dismissed += g._count._all
+    else if (g.isDone) counts[channel].completed += g._count._all
+    else counts[channel].open += g._count._all
   }
+
+  return counts
 })
 
 export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler(async ({ input, context }) => {
@@ -165,6 +172,28 @@ export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler
   })
 })
 
+export const dismissThread = authed.input(DismissThreadSchema).handler(async ({ input, context }) => {
+  const userId = context.user.id
+
+  const thread = await prisma.redditThread.findUnique({
+    where: { id: input.threadId },
+    include: { project: true },
+  })
+
+  if (!thread || thread.project.userId !== userId) {
+    throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+  }
+
+  return prisma.redditThread.update({
+    where: { id: input.threadId },
+    data: { 
+      isDismissed: input.isDismissed,
+      dismissedAt: input.isDismissed ? new Date() : null,
+      isDone: input.isDismissed ? false : thread.isDone // Restore to open if undismissed
+    },
+  })
+})
+
 export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handler(async ({ input, context }) => {
   const userId = context.user.id
 
@@ -182,6 +211,7 @@ export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handl
       id: { in: input.threadIds },
       channel: input.channel,
       isDone: false,
+      isDismissed: false,
     },
     data: { isDone: true },
   })
@@ -214,26 +244,19 @@ export const generateThreadReply = authed.input(GenerateThreadReplySchema).handl
     ? await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
     : ''
 
-  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.${rulesPrompt}`
-
-  const prompt = `Platform: ${channelName}
-Thread Title: ${thread.title}
-Community/Channel: ${thread.subreddit}
-Content/Body: ${thread.body || thread.title}
-
-My Product: ${thread.project.name}
-Description: ${thread.project.description}
-Target Audience: ${thread.project.targetAudience}
-
-Write a helpful ${channelName} reply. Keep it concise.
-Shouldnt sound like a ai generated, keep it short straight to the point. reply in a way that user might reply back, but make sure you dont ask question unnecessarily.
-`
-
-
-  const reply = await callAI({ provider, apiKey, prompt, system })
+  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. ${rulesPrompt}`
+  
+  const response = await callAI({
+    provider,
+    apiKey,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: `Post title: ${thread.title}\n\nPost body: ${thread.body ?? ''}` },
+    ],
+  })
 
   return prisma.redditThread.update({
     where: { id: input.threadId },
-    data: { generatedReply: reply },
+    data: { generatedReply: response },
   })
 })

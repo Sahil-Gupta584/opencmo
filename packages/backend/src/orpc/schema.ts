@@ -52,6 +52,7 @@ export const FetchInboundsSchema = z.object({
 export const ListThreadsSchema = z.object({
   projectId: z.string(),
   isDone: z.boolean().optional(),
+  isDismissed: z.boolean().optional(),
   channel: z.enum(['all', 'reddit', 'twitter', 'linkedin']).optional(),
 })
 
@@ -62,6 +63,11 @@ export const ListThreadCountsSchema = z.object({
 export const UpdateThreadStatusSchema = z.object({
   threadId: z.string(),
   isDone: z.boolean(),
+})
+
+export const DismissThreadSchema = z.object({
+  threadId: z.string(),
+  isDismissed: z.boolean(),
 })
 
 export const MarkThreadsCompleteSchema = z.object({

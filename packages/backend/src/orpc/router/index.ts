@@ -1,7 +1,7 @@
 import { addTodo, listTodos } from './todos'
 import { getApiConfig, saveApiConfig } from './api-config'
 import { listProjects, createProject, analyzeProduct, updateProject, refreshSubreddits, addSubreddit, removeSubreddit } from './projects'
-import { fetchInbounds, listThreads, listThreadCounts, updateThreadStatus, generateThreadReply, markThreadsComplete } from './inbounds'
+import { fetchInbounds, listThreads, listThreadCounts, updateThreadStatus, dismissThread, generateThreadReply, markThreadsComplete } from './inbounds'
 import { getNotificationPref, saveNotificationPref } from './notifications'
 import { getMentionsInterest, saveMentionsInterest, getAlertPref, saveAlertPref } from './prefs'
 import { createCheckout, getSubscription } from './billing'
@@ -26,6 +26,7 @@ export default {
   listThreads,
   listThreadCounts,
   updateThreadStatus,
+  dismissThread,
   generateThreadReply,
   markThreadsComplete,
   getNotificationPref,
@@ -43,4 +44,3 @@ export default {
     testDb,
   },
 }
-

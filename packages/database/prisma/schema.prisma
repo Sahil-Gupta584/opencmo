@@ -163,12 +163,14 @@ model RedditThread {
   intentReason  String?      @db.Text
 
   isDone         Boolean      @default(false)
+  isDismissed    Boolean      @default(false)
+  dismissedAt    DateTime?
   generatedReply String?      @db.Text
 
   fetchedAt      DateTime     @default(now())
 
   @@unique([projectId, redditId])
-  @@index([projectId, channel, isDone, redditCreatedAt])
+  @@index([projectId, channel, isDone, isDismissed, redditCreatedAt])
   @@map("reddit_thread")
 }
 
@@ -237,7 +239,4 @@ model AlertPref {
   notifyOutbound Boolean  @default(true)
   channels       String[] // requested channels: whatsapp, slack, discord, or custom
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@map("alert_pref")
 }

@@ -22,7 +22,7 @@ interface InboundsFeedProps {
 
 export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'dismissed'>('active')
   const [selectedChannel, setSelectedChannel] = useState<ChannelKey>('reddit')
 
   // Fetch active project's isFetching flag so we can show fetch progress
@@ -40,7 +40,12 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
   // Fetch threads for active project
   const { data: threads = [], isLoading: loadingThreads } = useQuery({
     ...orpc.listThreads.queryOptions({
-      input: { projectId: resolvedProjectId, isDone: activeTab === 'completed', channel: selectedChannel },
+      input: {
+        projectId: resolvedProjectId,
+        isDone: activeTab === 'completed',
+        isDismissed: activeTab === 'dismissed',
+        channel: selectedChannel,
+      },
     }),
     enabled: !!resolvedProjectId,
   })
@@ -92,6 +97,12 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
     }),
   )
 
+  const activeCounts = threadCounts?.active ?? { reddit: 0, twitter: 0, linkedin: 0 }
+  const completedCounts = threadCounts?.completed ?? { reddit: 0, twitter: 0, linkedin: 0 }
+  const dismissedCounts = threadCounts?.dismissed ?? { reddit: 0, twitter: 0, linkedin: 0 }
+
+  const currentCounts = activeTab === 'active' ? activeCounts : activeTab === 'completed' ? completedCounts : dismissedCounts
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -132,7 +143,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-3">
         <Tabs
           selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed')}
+          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed' | 'dismissed')}
           variant="underlined"
           color="primary"
           classNames={{
@@ -143,12 +154,13 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         >
           <Tab key="active" title="Active Leads" />
           <Tab key="completed" title="Completed" />
+          <Tab key="dismissed" title="Dismissed" />
         </Tabs>
 
         {/* Channel Filter Pills */}
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
           <ChannelFilterPills
-            counts={{ reddit: threadCounts?.reddit ?? 0, twitter: threadCounts?.twitter ?? 0, linkedin: threadCounts?.linkedin ?? 0 }}
+            counts={{ reddit: currentCounts.reddit ?? 0, twitter: currentCounts.twitter ?? 0, linkedin: currentCounts.linkedin ?? 0 }}
             selected={selectedChannel}
             onSelect={setSelectedChannel}
           />
@@ -185,10 +197,18 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
       ) : threads.length === 0 ? (
         <EmptyState
           icon={<RiInboxLine className="text-2xl" />}
-          title={activeTab === 'completed' ? 'No completed leads yet' : 'No active leads found'}
+          title={
+            activeTab === 'completed'
+              ? 'No completed leads yet'
+              : activeTab === 'dismissed'
+              ? 'No dismissed leads'
+              : 'No active leads found'
+          }
           description={
             activeTab === 'completed'
               ? 'Leads you mark as completed will appear here.'
+              : activeTab === 'dismissed'
+              ? 'Leads you dismiss will appear here.'
               : 'We fetch leads in batches every 6 hours. You will get notified through Alerts!'
           }
         />
@@ -206,6 +226,8 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
                 isUpdating={isUpdating}
                 onGenerateReply={(t) => generateReplyMutation.mutate({ threadId: t.id })}
                 onToggleStatus={(t) => updateStatusMutation.mutate({ threadId: t.id, isDone: !t.isDone })}
+                onDismiss={(t) => updateStatusMutation.mutate({ threadId: t.id, isDismissed: true })}
+                onRestore={(t) => updateStatusMutation.mutate({ threadId: t.id, isDismissed: false })}
               />
             )
           })}

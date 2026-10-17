@@ -22,30 +22,30 @@ interface InboundsFeedProps {
 
 export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'dismissed'>('active')
   const [selectedChannel, setSelectedChannel] = useState<ChannelKey>('reddit')
 
-  // Fetch active project's isFetching flag so we can show fetch progress
   const { data: projects = [] } = useQuery({
     ...orpc.listProjects.queryOptions(),
     refetchInterval: 4000,
   })
 
-  // Fall back to the first project if the URL points at a deleted/unknown id,
-  // so we never query data for a project that doesn't exist.
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0]
   const resolvedProjectId = activeProject?.id ?? ''
   const isFetching = Boolean(activeProject?.isFetching)
 
-  // Fetch threads for active project
   const { data: threads = [], isLoading: loadingThreads } = useQuery({
     ...orpc.listThreads.queryOptions({
-      input: { projectId: resolvedProjectId, isDone: activeTab === 'completed', channel: selectedChannel },
+      input: {
+        projectId: resolvedProjectId,
+        isDone: activeTab === 'completed',
+        isDismissed: activeTab === 'dismissed',
+        channel: selectedChannel,
+      },
     }),
     enabled: !!resolvedProjectId,
   })
 
-  // Per-channel counts for the filter pills
   const { data: threadCounts } = useQuery({
     ...orpc.listThreadCounts.queryOptions({
       input: { projectId: resolvedProjectId },
@@ -53,7 +53,6 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
     enabled: !!resolvedProjectId,
   })
 
-  // Mutations
   const fetchInboundsMutation = useMutation(
     orpc.fetchInbounds.mutationOptions({
       onSuccess: () => {
@@ -94,7 +93,6 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Inbounds</h1>
@@ -103,7 +101,6 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
           </p>
         </div>
 
-        {/* Fetch Button */}
          <div className="flex items-center gap-3">
           <Button
             color="primary"
@@ -118,7 +115,6 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </div>
       </div>
 
-      {/* ── Fetching Banner ─────────────────────────────────────────────── */}
       {isFetching && (
         <div className="mb-6 flex items-center gap-3 rounded-xl border border-coral/30 bg-coral/10 px-4 py-3">
           <Spinner size="sm" color="primary" />
@@ -128,11 +124,10 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </div>
       )}
 
-      {/* ── Filters & Tabs ──────────────────────────────────────────────── */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-3">
         <Tabs
           selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed')}
+          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed' | 'dismissed')}
           variant="underlined"
           color="primary"
           classNames={{
@@ -141,11 +136,11 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
             tab: 'px-0 font-medium',
           }}
         >
-          <Tab key="active" title="Active Leads" />
-          <Tab key="completed" title="Completed" />
+          <Tab key="active" title={`Active (${threadCounts?.active[selectedChannel] ?? 0})`} />
+          <Tab key="completed" title={`Completed (${threadCounts?.completed[selectedChannel] ?? 0})`} />
+          <Tab key="dismissed" title={`Dismissed (${threadCounts?.dismissed[selectedChannel] ?? 0})`} />
         </Tabs>
 
-        {/* Channel Filter Pills */}
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
           <ChannelFilterPills
             counts={{ reddit: threadCounts?.reddit ?? 0, twitter: threadCounts?.twitter ?? 0, linkedin: threadCounts?.linkedin ?? 0 }}
@@ -177,7 +172,6 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
         </div>
       </div>
 
-      {/* ── Threads Feed ────────────────────────────────────────────────── */}
       {loadingThreads ? (
         <div className="flex h-64 items-center justify-center">
           <Spinner size="lg" />
@@ -185,10 +179,12 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
       ) : threads.length === 0 ? (
         <EmptyState
           icon={<RiInboxLine className="text-2xl" />}
-          title={activeTab === 'completed' ? 'No completed leads yet' : 'No active leads found'}
+          title={activeTab === 'completed' ? 'No completed leads yet' : activeTab === 'dismissed' ? 'No dismissed leads' : 'No active leads found'}
           description={
             activeTab === 'completed'
               ? 'Leads you mark as completed will appear here.'
+              : activeTab === 'dismissed'
+              ? 'Leads you dismiss will appear here.'
               : 'We fetch leads in batches every 6 hours. You will get notified through Alerts!'
           }
         />
@@ -206,6 +202,8 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
                 isUpdating={isUpdating}
                 onGenerateReply={(t) => generateReplyMutation.mutate({ threadId: t.id })}
                 onToggleStatus={(t) => updateStatusMutation.mutate({ threadId: t.id, isDone: !t.isDone })}
+                onDismiss={(t) => updateStatusMutation.mutate({ threadId: t.id, isDismissed: true })}
+                onRestore={(t) => updateStatusMutation.mutate({ threadId: t.id, isDismissed: false })}
               />
             )
           })}

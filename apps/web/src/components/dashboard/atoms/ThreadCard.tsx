@@ -1,7 +1,7 @@
 import { Button, Card, CardBody } from '@heroui/react'
 import { useState } from 'react'
 import type { RedditThread } from '@repo/database'
-import { RiExternalLinkLine, RiCheckLine, RiFileCopyLine, RiMagicLine, RiUserLine, RiTimeLine } from 'react-icons/ri'
+import { RiExternalLinkLine, RiCheckLine, RiFileCopyLine, RiMagicLine, RiUserLine, RiTimeLine, RiCloseLine, RiRestartLine } from 'react-icons/ri'
 import { PriorityChip } from './PriorityChip'
 import { ChannelChip } from './ChannelChip'
 
@@ -12,6 +12,8 @@ interface ThreadCardProps {
   isUpdating?: boolean
   onGenerateReply?: (thread: RedditThread) => void
   onToggleStatus?: (thread: RedditThread) => void
+  onDismiss?: (thread: RedditThread) => void
+  onRestore?: (thread: RedditThread) => void
 }
 
 export function ThreadCard({
@@ -21,6 +23,8 @@ export function ThreadCard({
   isUpdating = false,
   onGenerateReply,
   onToggleStatus,
+  onDismiss,
+  onRestore,
 }: ThreadCardProps) {
   const [copied, setCopied] = useState<string | null>(null)
 
@@ -115,7 +119,33 @@ export function ThreadCard({
             </div>
             <p className="text-sm text-ink leading-relaxed font-normal">{thread.generatedReply}</p>
             {!readOnly && (
-              <div className="flex items-center justify-end pt-2 border-t border-coral/15">
+              <div className="flex items-center justify-between pt-2 border-t border-coral/15">
+                {thread.isDismissed ? (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    color="default"
+                    isLoading={isUpdating}
+                    startContent={!isUpdating && <RiRestartLine />}
+                    onPress={() => onRestore?.(thread)}
+                    className="font-medium"
+                  >
+                    Restore to Open
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    color="danger"
+                    isLoading={isUpdating}
+                    startContent={!isUpdating && <RiCloseLine />}
+                    onPress={() => onDismiss?.(thread)}
+                    className="font-medium"
+                  >
+                    Dismiss
+                  </Button>
+                )}
+
                 <Button
                   size="sm"
                   variant="light"
@@ -148,17 +178,45 @@ export function ThreadCard({
               {isReplying ? 'AI Writing Reply…' : 'Generate Reply'}
             </Button>
 
-            <Button
-              size="sm"
-              variant="light"
-              color={thread.isDone ? 'default' : 'success'}
-              isLoading={isUpdating}
-              startContent={!isUpdating && <RiCheckLine />}
-              onPress={() => onToggleStatus?.(thread)}
-              className="font-medium"
-            >
-              {thread.isDone ? 'Re-open' : 'Mark as Completed'}
-            </Button>
+            <div className="flex items-center gap-2">
+              {thread.isDismissed ? (
+                <Button
+                  size="sm"
+                  variant="light"
+                  color="default"
+                  isLoading={isUpdating}
+                  startContent={!isUpdating && <RiRestartLine />}
+                  onPress={() => onRestore?.(thread)}
+                  className="font-medium"
+                >
+                  Restore to Open
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="light"
+                  color="danger"
+                  isLoading={isUpdating}
+                  startContent={!isUpdating && <RiCloseLine />}
+                  onPress={() => onDismiss?.(thread)}
+                  className="font-medium"
+                >
+                  Dismiss
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                variant="light"
+                color={thread.isDone ? 'default' : 'success'}
+                isLoading={isUpdating}
+                startContent={!isUpdating && <RiCheckLine />}
+                onPress={() => onToggleStatus?.(thread)}
+                className="font-medium"
+              >
+                {thread.isDone ? 'Re-open' : 'Mark as Completed'}
+              </Button>
+            </div>
           </div>
         )}
       </CardBody>

@@ -105,6 +105,7 @@ export const listThreads = authed.input(ListThreadsSchema).handler(async ({ inpu
     where: {
       projectId: input.projectId,
       ...(input.isDone !== undefined ? { isDone: input.isDone } : {}),
+      ...(input.isDismissed !== undefined ? { isDismissed: input.isDismissed } : { isDismissed: false }),
       ...(input.channel && input.channel !== 'all' ? { channel: input.channel } : {}),
     },
     orderBy: { redditCreatedAt: 'desc' },
@@ -131,7 +132,7 @@ export const listThreadCounts = authed.input(ListThreadCountsSchema).handler(asy
 
   const grouped = await prisma.redditThread.groupBy({
     by: ['channel'],
-    where: { projectId: input.projectId },
+    where: { projectId: input.projectId, isDismissed: false },
     _count: { _all: true },
   })
 
@@ -161,7 +162,10 @@ export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler
 
   return prisma.redditThread.update({
     where: { id: input.threadId },
-    data: { isDone: input.isDone },
+    data: {
+      ...(input.isDone !== undefined ? { isDone: input.isDone } : {}),
+      ...(input.isDismissed !== undefined ? { isDismissed: input.isDismissed, dismissedAt: input.isDismissed ? new Date() : null } : {}),
+    },
   })
 })
 
@@ -182,6 +186,7 @@ export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handl
       id: { in: input.threadIds },
       channel: input.channel,
       isDone: false,
+      isDismissed: false,
     },
     data: { isDone: true },
   })
@@ -214,26 +219,4 @@ export const generateThreadReply = authed.input(GenerateThreadReplySchema).handl
     ? await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
     : ''
 
-  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.${rulesPrompt}`
-
-  const prompt = `Platform: ${channelName}
-Thread Title: ${thread.title}
-Community/Channel: ${thread.subreddit}
-Content/Body: ${thread.body || thread.title}
-
-My Product: ${thread.project.name}
-Description: ${thread.project.description}
-Target Audience: ${thread.project.targetAudience}
-
-Write a helpful ${channelName} reply. Keep it concise.
-Shouldnt sound like a ai generated, keep it short straight to the point. reply in a way that user might reply back, but make sure you dont ask question unnecessarily.
-`
-
-
-  const reply = await callAI({ provider, apiKey, prompt, system })
-
-  return prisma.redditThread.update({
-    where: { id: input.threadId },
-    data: { generatedReply: reply },
-  })
-})
+  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. `

@@ -24,11 +24,6 @@ function getAiCredentials(apiConfig: any) {
   return { provider, apiKey }
 }
 
-/**
- * Loads a subreddit's rules for prompt injection. Uses the DB cache first
- * (rulesJson persisted at create/refresh); falls back to a live fetch when
- * missing. Fail-open: returns '' so a rules fetch never blocks reply gen.
- */
 async function getSubredditRulesPrompt(projectId: string, subredditName: string): Promise<string> {
   try {
     const existing = await prisma.projectSubreddit.findFirst({
@@ -38,7 +33,6 @@ async function getSubredditRulesPrompt(projectId: string, subredditName: string)
 
     let rules = parseRules(existing?.rulesJson)
 
-    // Cold cache - fetch authoritative rules and persist them.
     if (rules.length === 0) {
       const cleanName = subredditName.replace(/^r\//, '').trim()
       const fetched = await fetchSubredditRules(cleanName)
@@ -76,7 +70,6 @@ export const fetchInbounds = authed.input(FetchInboundsSchema).handler(async ({ 
 
   const result = await fetchInboundsForProject(project.id)
 
-  // One batched email per project per cycle - only when genuinely new leads found
   if (result.success && result.newLeads.length > 0) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -105,16 +98,19 @@ export const listThreads = authed.input(ListThreadsSchema).handler(async ({ inpu
     where: {
       projectId: input.projectId,
       ...(input.isDone !== undefined ? { isDone: input.isDone } : {}),
+      ...(input.isDismissed !== undefined ? { isDismissed: input.isDismissed } : {}),
       ...(input.channel && input.channel !== 'all' ? { channel: input.channel } : {}),
     },
-    orderBy: { redditCreatedAt: 'desc' },
+    orderBy: input.isDismissed ? { dismissedAt: 'desc' } : { redditCreatedAt: 'desc' },
   })
 
   const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
   return threads.sort(
     (a, b) =>
       (priorityRank[a.priority ?? 'medium'] ?? 1) - (priorityRank[b.priority ?? 'medium'] ?? 1) ||
-      b.redditCreatedAt.getTime() - a.redditCreatedAt.getTime(),
+      (input.isDismissed
+        ? (b.dismissedAt?.getTime() ?? 0) - (a.dismissedAt?.getTime() ?? 0)
+        : b.redditCreatedAt.getTime() - a.redditCreatedAt.getTime()),
   )
 })
 
@@ -129,21 +125,52 @@ export const listThreadCounts = authed.input(ListThreadCountsSchema).handler(asy
     throw new ORPCError('NOT_FOUND', { message: 'Project not found' })
   }
 
-  const grouped = await prisma.redditThread.groupBy({
+  const activeGrouped = await prisma.redditThread.groupBy({
     by: ['channel'],
-    where: { projectId: input.projectId },
+    where: { projectId: input.projectId, isDone: false, isDismissed: false },
     _count: { _all: true },
   })
 
-  const counts: Record<string, number> = {}
-  for (const g of grouped) {
-    counts[g.channel] = g._count._all
-  }
+  const completedGrouped = await prisma.redditThread.groupBy({
+    by: ['channel'],
+    where: { projectId: input.projectId, isDone: true, isDismissed: false },
+    _count: { _all: true },
+  })
+
+  const dismissedGrouped = await prisma.redditThread.groupBy({
+    by: ['channel'],
+    where: { projectId: input.projectId, isDismissed: true },
+    _count: { _all: true },
+  })
+
+  const active: Record<string, number> = {}
+  for (const g of activeGrouped) active[g.channel] = g._count._all
+
+  const completed: Record<string, number> = {}
+  for (const g of completedGrouped) completed[g.channel] = g._count._all
+
+  const dismissed: Record<string, number> = {}
+  for (const g of dismissedGrouped) dismissed[g.channel] = g._count._all
 
   return {
-    reddit: counts.reddit ?? 0,
-    twitter: counts.twitter ?? 0,
-    linkedin: counts.linkedin ?? 0,
+    active: {
+      reddit: active.reddit ?? 0,
+      twitter: active.twitter ?? 0,
+      linkedin: active.linkedin ?? 0,
+    },
+    completed: {
+      reddit: completed.reddit ?? 0,
+      twitter: completed.twitter ?? 0,
+      linkedin: completed.linkedin ?? 0,
+    },
+    dismissed: {
+      reddit: dismissed.reddit ?? 0,
+      twitter: dismissed.twitter ?? 0,
+      linkedin: dismissed.linkedin ?? 0,
+    },
+    reddit: active.reddit ?? 0,
+    twitter: active.twitter ?? 0,
+    linkedin: active.linkedin ?? 0,
   }
 })
 
@@ -159,9 +186,16 @@ export const updateThreadStatus = authed.input(UpdateThreadStatusSchema).handler
     throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
   }
 
+  const data: any = {}
+  if (input.isDone !== undefined) data.isDone = input.isDone
+  if (input.isDismissed !== undefined) {
+    data.isDismissed = input.isDismissed
+    data.dismissedAt = input.isDismissed ? new Date() : null
+  }
+
   return prisma.redditThread.update({
     where: { id: input.threadId },
-    data: { isDone: input.isDone },
+    data,
   })
 })
 
@@ -182,6 +216,7 @@ export const markThreadsComplete = authed.input(MarkThreadsCompleteSchema).handl
       id: { in: input.threadIds },
       channel: input.channel,
       isDone: false,
+      isDismissed: false,
     },
     data: { isDone: true },
   })
@@ -214,23 +249,25 @@ export const generateThreadReply = authed.input(GenerateThreadReplySchema).handl
     ? await getSubredditRulesPrompt(thread.projectId, thread.subreddit)
     : ''
 
-  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. Keep tone native to ${channelName} (concise & punchy for X, professional B2B for LinkedIn, authentic for Reddit). Do NOT write promotional fluff.${rulesPrompt}`
+  const system = `You are a helpful, empathetic founder who builds software. Write a genuine, value-first reply for ${channelName} that directly answers the post author's question. Mention the product naturally only if relevant. ${rulesPrompt}`
 
-  const prompt = `Platform: ${channelName}
-Thread Title: ${thread.title}
-Community/Channel: ${thread.subreddit}
-Content/Body: ${thread.body || thread.title}
-
-My Product: ${thread.project.name}
+  const userPrompt = `Product / Project context:
+Name: ${thread.project.name}
 Description: ${thread.project.description}
-Target Audience: ${thread.project.targetAudience}
+URL: ${thread.project.url || 'None'}
 
-Write a helpful ${channelName} reply. Keep it concise.
-Shouldnt sound like a ai generated, keep it short straight to the point. reply in a way that user might reply back, but make sure you dont ask question unnecessarily.
-`
+Post to reply to:
+Subreddit / Channel: ${thread.subreddit}
+Author: ${thread.author}
+Title: ${thread.title}
+Body: ${thread.body || '(No body)'}`
 
-
-  const reply = await callAI({ provider, apiKey, prompt, system })
+  const reply = await callAI({
+    provider,
+    apiKey,
+    system,
+    prompt: userPrompt,
+  })
 
   return prisma.redditThread.update({
     where: { id: input.threadId },

@@ -22,7 +22,7 @@ interface InboundsFeedProps {
 
 export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'dismissed'>('active')
   const [selectedChannel, setSelectedChannel] = useState<ChannelKey>('reddit')
 
   // Fetch active project's isFetching flag so we can show fetch progress
@@ -40,7 +40,12 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
   // Fetch threads for active project
   const { data: threads = [], isLoading: loadingThreads } = useQuery({
     ...orpc.listThreads.queryOptions({
-      input: { projectId: resolvedProjectId, isDone: activeTab === 'completed', channel: selectedChannel },
+      input: {
+        projectId: resolvedProjectId,
+        isDone: activeTab === 'completed',
+        isDismissed: activeTab === 'dismissed',
+        channel: selectedChannel,
+      },
     }),
     enabled: !!resolvedProjectId,
   })
@@ -132,7 +137,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-3">
         <Tabs
           selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed')}
+          onSelectionChange={(key) => setActiveTab(key as 'active' | 'completed' | 'dismissed')}
           variant="underlined"
           color="primary"
           classNames={{
@@ -141,8 +146,9 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
             tab: 'px-0 font-medium',
           }}
         >
-          <Tab key="active" title="Active Leads" />
-          <Tab key="completed" title="Completed" />
+          <Tab key="active" title={`Active Leads${threadCounts?.active !== undefined ? ` (${threadCounts.active})` : ''}`} />
+          <Tab key="completed" title={`Completed${threadCounts?.completed !== undefined ? ` (${threadCounts.completed})` : ''}`} />
+          <Tab key="dismissed" title={`Dismissed${threadCounts?.dismissed !== undefined ? ` (${threadCounts.dismissed})` : ''}`} />
         </Tabs>
 
         {/* Channel Filter Pills */}
@@ -185,10 +191,18 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
       ) : threads.length === 0 ? (
         <EmptyState
           icon={<RiInboxLine className="text-2xl" />}
-          title={activeTab === 'completed' ? 'No completed leads yet' : 'No active leads found'}
+          title={
+            activeTab === 'completed'
+              ? 'No completed leads yet'
+              : activeTab === 'dismissed'
+              ? 'No dismissed leads yet'
+              : 'No active leads found'
+          }
           description={
             activeTab === 'completed'
               ? 'Leads you mark as completed will appear here.'
+              : activeTab === 'dismissed'
+              ? 'Irrelevant or dismissed leads will appear here.'
               : 'We fetch leads in batches every 6 hours. You will get notified through Alerts!'
           }
         />
@@ -206,6 +220,7 @@ export function InboundsFeed({ activeProjectId }: InboundsFeedProps) {
                 isUpdating={isUpdating}
                 onGenerateReply={(t) => generateReplyMutation.mutate({ threadId: t.id })}
                 onToggleStatus={(t) => updateStatusMutation.mutate({ threadId: t.id, isDone: !t.isDone })}
+                onToggleDismiss={(t) => updateStatusMutation.mutate({ threadId: t.id, isDismissed: !(t as any).isDismissed })}
               />
             )
           })}

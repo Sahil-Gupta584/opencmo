@@ -1,6 +1,7 @@
 import { authed } from '../middleware.js'
 import { prisma } from '@repo/database'
-import { SaveMentionsInterestSchema, SaveAlertPrefSchema } from '../schema.js'
+import { SaveMentionsInterestSchema, SaveAlertPrefSchema, TestDiscordWebhookSchema } from '../schema.js'
+import { sendDiscordTestPing } from '../../notifications.js'
 
 export const getMentionsInterest = authed.input(SaveMentionsInterestSchema.pick({ feature: true })).handler(async ({ input, context }) => {
   const record = await prisma.featureInterest.findUnique({
@@ -28,6 +29,8 @@ export const getAlertPref = authed.handler(async ({ context }) => {
     notifyInbounds: pref?.notifyInbounds ?? true,
     notifyOutbound: pref?.notifyOutbound ?? true,
     channels,
+    discordEnabled: pref?.discordEnabled ?? false,
+    discordWebhookUrl: pref?.discordWebhookUrl ?? '',
   }
 })
 
@@ -42,17 +45,28 @@ export const saveAlertPref = authed.input(SaveAlertPrefSchema).handler(async ({ 
       notifyInbounds: input.notifyInbounds,
       notifyOutbound: input.notifyOutbound,
       channels,
+      discordEnabled: input.discordEnabled ?? false,
+      discordWebhookUrl: input.discordWebhookUrl?.trim() || null,
     },
     update: {
       emailEnabled: channels.includes('Email'),
       notifyInbounds: input.notifyInbounds,
       notifyOutbound: input.notifyOutbound,
       channels,
+      ...(input.discordEnabled !== undefined ? { discordEnabled: input.discordEnabled } : {}),
+      ...(input.discordWebhookUrl !== undefined ? { discordWebhookUrl: input.discordWebhookUrl.trim() || null } : {}),
     },
   })
   return {
     notifyInbounds: pref.notifyInbounds,
     notifyOutbound: pref.notifyOutbound,
     channels: pref.channels,
+    discordEnabled: pref.discordEnabled,
+    discordWebhookUrl: pref.discordWebhookUrl ?? '',
   }
+})
+
+export const testDiscordWebhook = authed.input(TestDiscordWebhookSchema).handler(async ({ input }) => {
+  const result = await sendDiscordTestPing(input.webhookUrl)
+  return result
 })

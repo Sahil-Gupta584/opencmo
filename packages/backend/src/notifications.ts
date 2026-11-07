@@ -97,3 +97,156 @@ export async function sendNewLeadsEmail(
     console.error(`🔴 [Notify] Failed to send email for user ${user.id}:`, err)
   }
 }
+export const DISCORD_WEBHOOK_REGEX =
+  /^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+$/
+
+export function isValidDiscordWebhookUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false
+  return DISCORD_WEBHOOK_REGEX.test(url.trim())
+}
+
+export interface DiscordEmbedField {
+  name: string
+  value: string
+  inline?: boolean
+}
+
+export interface DiscordEmbed {
+  title: string
+  description?: string
+  url?: string
+  color?: number
+  fields?: DiscordEmbedField[]
+  footer?: { text: string }
+  timestamp?: string
+}
+
+export interface DiscordWebhookPayload {
+  content?: string
+  embeds?: DiscordEmbed[]
+}
+
+export function formatDiscordEmbed(
+  projectName: string,
+  newLeads: NewLead[],
+): DiscordWebhookPayload {
+  const count = newLeads.length
+  const inboundUrl = env.BETTER_AUTH_URL
+    ? `${env.BETTER_AUTH_URL}/dashboard/inbounds`
+    : undefined
+
+  const priorityRank = { high: 0, medium: 1, low: 2 } as const
+  const sortedLeads = [...newLeads]
+    .sort(
+      (a, b) =>
+        (priorityRank[a.priority as keyof typeof priorityRank] ?? 1) -
+        (priorityRank[b.priority as keyof typeof priorityRank] ?? 1),
+    )
+    .slice(0, 5)
+
+  const fields: DiscordEmbedField[] = sortedLeads.map((lead) => {
+    const channelTag = lead.channel ? `[${lead.channel.toUpperCase()}]` : ''
+    const sub = lead.subreddit ? `${lead.subreddit} · ` : ''
+    const intent = lead.intentReason ? `\n> ${lead.intentReason}` : ''
+    return {
+      name: `${channelTag} ${lead.priority.toUpperCase()}: ${lead.title}`.slice(0, 256),
+      value: `${sub}[View Thread](${lead.url})${intent}`.slice(0, 1024),
+    }
+  })
+
+  return {
+    embeds: [
+      {
+        title: `🎯 ${count} new lead${count > 1 ? 's' : ''} found for ${projectName}`,
+        description: `New buying-intent discussions match your product keywords. Reply quickly while the conversation is active.`,
+        url: inboundUrl,
+        color: 0x5865f2, // Discord Blurple
+        fields,
+        footer: { text: 'OpenCMO Lead Alerts' },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+}
+
+export async function sendDiscordTestPing(
+  webhookUrl: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!isValidDiscordWebhookUrl(webhookUrl)) {
+    return {
+      success: false,
+      error: 'Please enter a valid Discord webhook URL (e.g. https://discord.com/api/webhooks/...)',
+    }
+  }
+
+  try {
+    const payload: DiscordWebhookPayload = {
+      embeds: [
+        {
+          title: '🔔 OpenCMO Discord Alert Verification',
+          description:
+            'Your Discord webhook is configured successfully! New buying-intent leads will be posted here.',
+          color: 0x57f287, // Green
+          footer: { text: 'OpenCMO Notifications' },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }
+
+    const response = await fetch(webhookUrl.trim(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      return {
+        success: false,
+        error: `Discord webhook rejected the ping (HTTP ${response.status}: ${response.statusText}${text ? ` - ${text}` : ''})`,
+      }
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('🔴 [Discord] Failed to send test ping:', err)
+    return {
+      success: false,
+      error: err?.message || 'Failed to connect to Discord webhook URL',
+    }
+  }
+}
+
+export async function sendNewLeadsDiscordAlert(
+  webhookUrl: string,
+  projectName: string,
+  newLeads: NewLead[],
+): Promise<void> {
+  if (!newLeads || newLeads.length === 0) return
+  if (!isValidDiscordWebhookUrl(webhookUrl)) {
+    console.warn('⚠️ [Discord] Skipping alert: invalid webhook URL')
+    return
+  }
+
+  try {
+    const payload = formatDiscordEmbed(projectName, newLeads)
+    const response = await fetch(webhookUrl.trim(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      console.error(
+        `🔴 [Discord] Webhook error (${response.status} ${response.statusText}): ${text}`,
+      )
+    } else {
+      console.log(
+        `🟢 [Discord] Sent alert for ${newLeads.length} lead(s) on ${projectName}`,
+      )
+    }
+  } catch (err) {
+    console.error('🔴 [Discord] Failed to send new leads alert:', err)
+  }
+}

@@ -3,7 +3,7 @@ import { prisma } from '@repo/database'
 import { env } from '../../env.js'
 import { fetchInboundsForProject } from '../../inbounds-service.js'
 import { generateDailyContentForProject } from '../../daily-content.js'
-import { sendNewLeadsEmail } from '../../notifications.js'
+import { sendNewLeadsEmail, sendNewLeadsDiscordAlert } from '../../notifications.js'
 import { base } from '../middleware.js'
 
 // Gated by CRON_SECRET header - NOT a user session. Only the scheduler can call this.
@@ -37,10 +37,33 @@ export const runFetchCycle = cronAuthed.handler(async () => {
       if (result.success && result.newLeads.length > 0) {
         const user = await prisma.user.findUnique({
           where: { id: project.userId },
-          select: { id: true, email: true, name: true, notifyNewLeads: true },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            notifyNewLeads: true,
+            alertPref: {
+              select: {
+                discordEnabled: true,
+                discordWebhookUrl: true,
+                notifyInbounds: true,
+              },
+            },
+          },
         })
         if (user) {
           await sendNewLeadsEmail(user, project.name, result.newLeads)
+          if (
+            user.alertPref?.discordEnabled &&
+            user.alertPref.notifyInbounds &&
+            user.alertPref.discordWebhookUrl
+          ) {
+            await sendNewLeadsDiscordAlert(
+              user.alertPref.discordWebhookUrl,
+              project.name,
+              result.newLeads,
+            )
+          }
         }
       }
     } catch (err) {

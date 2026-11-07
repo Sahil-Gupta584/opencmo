@@ -89,4 +89,10 @@ export const SaveAlertPrefSchema = z.object({
   notifyInbounds: z.boolean(),
   notifyOutbound: z.boolean(),
   channels: z.array(z.string()),
+  discordEnabled: z.boolean().optional(),
+  discordWebhookUrl: z.string().optional(),
+})
+
+export const TestDiscordWebhookSchema = z.object({
+  webhookUrl: z.string().min(1, 'Webhook URL is required'),
 })

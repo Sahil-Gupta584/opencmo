@@ -3,7 +3,7 @@ import { prisma } from '@repo/database'
 import { callAI } from '../../ai.js'
 import { decrypt } from '../../crypto.js'
 import { fetchInboundsForProject } from '../../inbounds-service.js'
-import { sendNewLeadsEmail } from '../../notifications.js'
+import { sendNewLeadsEmail, sendNewLeadsDiscordAlert } from '../../notifications.js'
 import {
   FetchInboundsSchema,
   ListThreadsSchema,
@@ -73,10 +73,33 @@ export const fetchInbounds = authed.input(FetchInboundsSchema).handler(async ({ 
   if (result.success && result.newLeads.length > 0) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, notifyNewLeads: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        notifyNewLeads: true,
+        alertPref: {
+          select: {
+            discordEnabled: true,
+            discordWebhookUrl: true,
+            notifyInbounds: true,
+          },
+        },
+      },
     })
     if (user) {
       await sendNewLeadsEmail(user, project.name, result.newLeads)
+      if (
+        user.alertPref?.discordEnabled &&
+        user.alertPref.notifyInbounds &&
+        user.alertPref.discordWebhookUrl
+      ) {
+        await sendNewLeadsDiscordAlert(
+          user.alertPref.discordWebhookUrl,
+          project.name,
+          result.newLeads,
+        )
+      }
     }
   }
 

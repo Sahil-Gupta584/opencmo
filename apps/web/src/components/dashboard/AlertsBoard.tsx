@@ -1,8 +1,9 @@
-import { Button, Card, CardBody, CardHeader, Checkbox, Chip, Input, Spinner } from '@heroui/react'
+import { Button, Card, CardBody, CardHeader, Checkbox, Chip, Spinner, Switch } from '@heroui/react'
+import { Input } from '#/components/Input'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { orpc } from '#/lib/orpc'
 import { useEffect, useState } from 'react'
-import { RiCheckLine, RiNotification3Line, RiAddLine, RiMailLine } from 'react-icons/ri'
+import { RiCheckLine, RiNotification3Line, RiAddLine, RiMailLine, RiErrorWarningLine } from 'react-icons/ri'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { SiSlack, SiDiscord } from 'react-icons/si'
 
@@ -23,6 +24,9 @@ export function AlertsBoard() {
   const [notifyOutbound, setNotifyOutbound] = useState(true)
   const [channels, setChannels] = useState<string[]>(['Email'])
   const [customChannel, setCustomChannel] = useState('')
+  const [discordEnabled, setDiscordEnabled] = useState(false)
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState('')
+  const [pingStatus, setPingStatus] = useState<{ type: 'idle' | 'success' | 'error'; message?: string }>({ type: 'idle' })
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
@@ -30,8 +34,35 @@ export function AlertsBoard() {
       setNotifyInbounds(pref.notifyInbounds)
       setNotifyOutbound(pref.notifyOutbound)
       setChannels(pref.channels.length ? pref.channels : ['Email'])
+      setDiscordEnabled(Boolean((pref as any).discordEnabled))
+      setDiscordWebhookUrl((pref as any).discordWebhookUrl ?? '')
     }
   }, [pref])
+
+  const testPingMutation = useMutation(
+    (orpc as any).testDiscordWebhook.mutationOptions({
+      onSuccess: (data: any) => {
+        if (data.success) {
+          setPingStatus({
+            type: 'success',
+            message: 'Test ping sent successfully! Check your Discord channel.',
+          })
+        } else {
+          setPingStatus({
+            type: 'error',
+            message: data.error || 'Failed to ping Discord webhook',
+          })
+        }
+      },
+      onError: (err: any) => {
+        console.error('🔴 Discord ping error:', err)
+        setPingStatus({
+          type: 'error',
+          message: err?.message || 'Error communicating with server',
+        })
+      },
+    }),
+  )
 
   const savePrefMutation = useMutation(
     orpc.saveAlertPref.mutationOptions({
@@ -65,8 +96,27 @@ export function AlertsBoard() {
     setCustomChannel('')
   }
 
+  const handleTestPing = () => {
+    if (!discordWebhookUrl.trim()) {
+      setPingStatus({
+        type: 'error',
+        message: 'Please enter a Discord Webhook URL first.',
+      })
+      return
+    }
+    setPingStatus({ type: 'idle' })
+    const mutateFn: any = testPingMutation.mutate;
+    mutateFn({ webhookUrl: discordWebhookUrl.trim() })
+  }
+
   const handleSave = () => {
-    savePrefMutation.mutate({ notifyInbounds, notifyOutbound, channels })
+    savePrefMutation.mutate({
+      notifyInbounds,
+      notifyOutbound,
+      channels,
+      discordEnabled,
+      discordWebhookUrl: discordWebhookUrl.trim(),
+    })
   }
 
   return (
@@ -117,6 +167,77 @@ export function AlertsBoard() {
                 </p>
               </div>
             </div>
+          </CardBody>
+        </Card>
+
+        {/* Discord Alerts */}
+        <Card className="card-surface" radius="lg">
+          <CardHeader className="px-6 pt-5 pb-0">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <SiDiscord className="text-[#5865F2] text-xl" />
+                <div>
+                  <h2 className="font-semibold text-ink">Discord Alerts</h2>
+                  <p className="mt-1 text-xs text-muted">
+                    Deliver real-time lead alerts directly to your Discord server via incoming webhook.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                isSelected={discordEnabled}
+                onValueChange={setDiscordEnabled}
+                aria-label="Enable Discord Delivery"
+                color="primary"
+              />
+            </div>
+          </CardHeader>
+          <CardBody className="space-y-4 px-6 pb-6 pt-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="discord-webhook-url" className="text-xs font-medium text-ink">
+                Discord Webhook URL
+              </label>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Input
+                  id="discord-webhook-url"
+                  value={discordWebhookUrl}
+                  onValueChange={(val) => {
+                    setDiscordWebhookUrl(val)
+                    if (pingStatus.type !== 'idle') setPingStatus({ type: 'idle' })
+                  }}
+                  placeholder="https://discord.com/api/webhooks/1234567890/abcdef..."
+                  className="w-full flex-1"
+                  type="url"
+                  autoComplete="off"
+                />
+                <Button
+                  variant="flat"
+                  color="secondary"
+                  className="font-medium whitespace-nowrap self-stretch sm:self-auto"
+                  isLoading={testPingMutation.isPending}
+                  onPress={handleTestPing}
+                  startContent={<SiDiscord />}
+                >
+                  Test Ping
+                </Button>
+              </div>
+              <p className="text-xs text-muted mt-1">
+                Create via Discord: <b>Channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL</b>.
+              </p>
+            </div>
+
+            {pingStatus.type === 'success' && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700">
+                <RiCheckLine className="text-base shrink-0" />
+                <span>{pingStatus.message}</span>
+              </div>
+            )}
+
+            {pingStatus.type === 'error' && (
+              <div className="flex items-center gap-2 rounded-lg border border-rose-100 bg-rose-50 p-3 text-sm text-rose-700">
+                <RiErrorWarningLine className="text-base shrink-0" />
+                <span>{pingStatus.message}</span>
+              </div>
+            )}
           </CardBody>
         </Card>
 
